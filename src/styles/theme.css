@@ -1,0 +1,49 @@
+/* Neon Loop design baseline: plum and violet, Loop Display and Loop Text. */
+@font-face { font-family: "Loop Display"; font-weight: 400; font-display: swap; src: url("/fonts/loop-display-400.woff") format("woff"); }
+@font-face { font-family: "Loop Display"; font-weight: 600; font-display: swap; src: url("/fonts/loop-display-600.woff") format("woff"); }
+@font-face { font-family: "Loop Text"; font-weight: 400; font-display: swap; src: url("/fonts/loop-text-400.woff") format("woff"); }
+@font-face { font-family: "Loop Text"; font-weight: 600; font-display: swap; src: url("/fonts/loop-text-600.woff") format("woff"); }
+
+:root {
+  --bg: #100e18; --panel: #1c1927; --panel2: #262132; --line: #393244; --text: #f6f2fa; --muted: #b5aabe;
+  --grad: linear-gradient(110deg, #7957db, #b84abb 60%, #dc658d); --accent: #cb82df; --warn: #ffb020; --ok: #3ddc97; --danger: #ff6b8a;
+  --font-display: "Loop Display", "Avenir Next", sans-serif; --font-ui: "Loop Text", "Helvetica Neue", Arial, sans-serif;
+  --depth: 0 22px 50px -20px #000b, 0 5px 14px #0004, inset 0 1px 0 #ffffff08;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-ui); font-size: 15px; line-height: 1.5; }
+body { min-height: 100vh; background: radial-gradient(900px 500px at 85% -10%, #7a2bd62e, transparent 70%), var(--bg); }
+a { color: var(--accent); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -.02em; margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+button { background: var(--panel2); border: 1px solid #ffffff1a; border-radius: 12px; padding: 9px 16px; cursor: pointer; }
+button:hover { border-color: #ffffff33; }
+button:disabled { opacity: .5; cursor: default; }
+button.primary { background: var(--grad); border-color: transparent; color: #fff; font-weight: 600; }
+input, select { background: #120f1b; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 6px; letter-spacing: .02em; }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px 48px; }
+.top { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-bottom: 1px solid #b84abb33; margin-bottom: 24px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+.brand img { width: 38px; height: 38px; border-radius: 10px; }
+.brand b { font-family: var(--font-display); font-size: 20px; letter-spacing: .02em; }
+.brand small { display: block; font-size: 9px; letter-spacing: .25em; color: var(--muted); }
+.spacer { flex: 1; }
+.pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; padding: 6px 12px; border-radius: 999px; border: 1px solid #ffffff1a; background: #ffffff0a; color: var(--muted); white-space: nowrap; }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.pill.ok i { background: var(--ok); } .pill.warn i { background: var(--warn); }
+.card { background: linear-gradient(145deg, #25202f, #1b1725); border: 1px solid #ffffff15; border-radius: 18px; padding: 18px; box-shadow: var(--depth); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+.muted { color: var(--muted); } .err { color: var(--danger); min-height: 20px; font-size: 14px; margin-top: 8px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ev h3 { font-size: 19px; margin-bottom: 4px; } .ev .meta { color: var(--muted); font-size: 13px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 22px; }
+.tabs a { text-decoration: none; color: var(--text); padding: 9px 16px; border-radius: 12px; border: 1px solid #ffffff1a; background: var(--panel2); }
+.tabs a.active { background: var(--grad); border-color: transparent; }
+.notice { border: 1px dashed #8f72a366; border-radius: 16px; padding: 18px; }
+dialog { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 16px; padding: 20px; width: min(460px, 94vw); }
+dialog::backdrop { background: #0009; }
+@media (max-width: 600px) { .top { gap: 10px; } .brand b { font-size: 17px; } }
