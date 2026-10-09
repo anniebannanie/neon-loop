@@ -1,17 +1,11 @@
 // The main app and the live show share one sign-in, and the live show opens the event and section asked for.
 // Builds the app against the mock Supabase, then drives it in Chromium. Run: node tests/app/01-one-sign-in.test.cjs
-const path = require('path'), http = require('http'), fs = require('fs');
 const { chromium } = require('playwright');
-const { execSync } = require('child_process');
-const sb = require('../legacy/mocksb.cjs'); const api = sb.start(8790);
+const H = require('./harness.cjs'), { sb, close } = H.start();
 sb.db.events.push({ id: 'e2222222-2222-4222-8222-222222222222', name: "Annie's Event", type: 'Flagship', event_date: '2026-11-12', created_at: '2026-10-02T00:00:00Z', rules: null, rundown: { items: [{ k: 'a', title: 'Doors', dur: 600 }] }, updated_at: '2026-10-02T00:00:00Z' });
-const dist = path.join(__dirname, 'out', 'dist');
-execSync('npx vite build --logLevel error --outDir ' + JSON.stringify(dist), { cwd: path.join(__dirname, '../..'), env: Object.assign({}, process.env, { VITE_SUPABASE_URL: 'http://localhost:8790', VITE_SUPABASE_ANON_KEY: 'anon-test' }), stdio: 'inherit' });
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff': 'font/woff' };
-const web = http.createServer((q, r) => { let f = path.join(dist, decodeURIComponent(q.url.split('?')[0])); if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) f = fs.existsSync(path.join(f, 'index.html')) ? path.join(f, 'index.html') : path.join(dist, 'index.html'); r.setHeader('content-type', types[path.extname(f)] || 'application/octet-stream'); r.end(fs.readFileSync(f)); }).listen(8791);
 const res = [], ck = (n, c) => res.push((c ? 'PASS ' : 'FAIL ') + n);
 (async () => {
-  const b = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}); const errs = [];
+  const b = await chromium.launch(H.launchOpts()); const errs = [];
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, serviceWorkers: 'block' }); const p = await ctx.newPage(); p.on('pageerror', e => errs.push(String(e))); p.on('dialog', d => d.accept());
   await p.goto('http://localhost:8791/'); await p.fill('#email', 'trevor@example.com'); await p.fill('#pass', 'secret123'); await p.click('button.primary'); await p.waitForSelector('.ev');
   const ls = await p.evaluate(() => ({ s: JSON.parse(localStorage.getItem('neonloop.session')), c: JSON.parse(localStorage.getItem('neonloop.cloud')), pr: JSON.parse(localStorage.getItem('neonloop.profile')) }));
@@ -35,5 +29,5 @@ const res = [], ck = (n, c) => res.push((c ? 'PASS ' : 'FAIL ') + n);
   await p.click(await p.isVisible('#btnCloud') ? '#btnCloud' : '#btnCloud2'); await p.waitForSelector('#cdEmail', { state: 'visible' }); await p.fill('#cdEmail', 'trevor@example.com'); await p.fill('#cdPass', 'secret123'); await p.click('#cdGo'); await p.waitForSelector('#cdAccount', { state: 'visible' });
   await p.goto('http://localhost:8791/'); await p.waitForSelector('.ev', { timeout: 8000 }).catch(() => {});
   ck('signing in from the live show signs the main app in too', await p.isVisible('.ev') && (await p.textContent('.top')).includes('Trevor'));
-  errs.forEach(x => res.push('ERR ' + x)); ck('no page errors', !errs.length); console.log(res.join('\n')); await b.close(); api.close(); web.close(); process.exit(0);
+  errs.forEach(x => res.push('ERR ' + x)); ck('no page errors', !errs.length); console.log(res.join('\n')); await b.close(); close(); process.exit(0);
 })().catch(e => { console.error('CRASH', e); process.exit(1); });

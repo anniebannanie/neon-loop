@@ -14,9 +14,10 @@ opens an event straight into a section. Each screen moves over as it is rebuilt;
 
 | Part | Status |
 | --- | --- |
-| Sign-in, events list, create and delete events | Rebuilt in React |
+| Sign-in, welcome splash, events list, create and delete events | Rebuilt in React |
+| Rundown: planning and editing (segments, lengths, start times, breaks, fixed starts, content, music, transitions, undo, drag to reorder, offline edits) | Rebuilt in React |
 | Timing, breaks, pledge totals, matching, takeovers, guest import | Ported to typed modules in `src/domain`, with unit tests |
-| Rundown, output, content, guests, pledges, remote | Running from `/legacy/`; being rebuilt screen by screen |
+| Running the show (take, holding, output window), content, guests, pledges, remote | Running from `/legacy/`; being rebuilt screen by screen |
 | Guests and pledges in the database | Schema ready (`supabase/migrations`), app not yet using it |
 
 The end-to-end suites in `tests/legacy` (about 400 checks) describe what the current app does.
