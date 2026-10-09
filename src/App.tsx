@@ -14,7 +14,7 @@ function Setup() {
         {configError === 'secret'
           ? <p>The app was built with the secret service key. Replace <code>VITE_SUPABASE_ANON_KEY</code> with the <b>anon public</b> key and rotate the secret key in Supabase, since it may have been exposed.</p>
           : <p>Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> in Vercel (Project Settings, Environment Variables) or in <code>.env.local</code>, then redeploy.</p>}
-        <p className="muted">The current Neon Loop still works without this: <a href="/legacy/">open it here</a>.</p>
+        <p className="muted">The live show still works without this: <a href="/legacy/">open it here</a>.</p>
       </div>
     </div>
   );

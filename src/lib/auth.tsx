@@ -19,8 +19,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!supabase || !session) { setProfile(null); return; }
     supabase.from('profiles').select('first_name, role').eq('id', session.user.id).maybeSingle()
-      .then(({ data }) => setProfile((data as Profile) || { first_name: '', role: 'team' }));
+      .then(({ data }) => { const pr = (data as Profile) || { first_name: '', role: 'team' }; setProfile(pr); try { localStorage.setItem('neonloop.profile', JSON.stringify(pr)); } catch { /* storage blocked */ } });
   }, [session]);
-  const signOut = async () => { if (supabase) await supabase.auth.signOut(); };
+  const signOut = async () => { if (supabase) await supabase.auth.signOut(); try { localStorage.removeItem('neonloop.profile'); } catch { /* storage blocked */ } };
   return <Ctx.Provider value={{ ready, session, profile, signOut }}>{children}</Ctx.Provider>;
 }
