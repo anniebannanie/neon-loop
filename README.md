@@ -73,7 +73,7 @@ supabase migration repair --status applied 20261009000001 20261009000002
 supabase db push
 ```
 
-`supabase/setup-by-hand.sql` is the original script for pasting into the SQL editor.
+**No CLI?** Paste all of `supabase/setup-by-hand.sql` into the SQL Editor and run it. It covers all three migrations, gives any existing accounts a profile (the earliest becomes the producer), and is safe to run again.
 
 ## Deploy on Vercel
 
