@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { JSX } from 'react';
 import { useOnline } from '../lib/offline';
+import { liveShowUrl } from '../lib/supabase';
 
 /* The floating side menu from the original Neon Loop: the event's places, always in reach.
    At phone width it becomes a bar along the bottom. */
@@ -29,7 +30,7 @@ export function Rail({ eventId, section }: { eventId: string; section: string })
         <Link key={k} to={'/events/' + eventId + '/' + k} title={tip} aria-current={section === k ? 'page' : undefined}>{ICONS[k]}<span>{label}</span></Link>
       ))}
       <span className="rail-grow" />
-      <a href="/legacy/" title={'Run the show in the current Neon Loop' + (online ? '' : ' (works offline)')} className="rail-live">{ICONS.live}<span>Live show</span><i className={online ? 'ok' : 'warn'} /></a>
+      <a href={liveShowUrl(eventId, section)} title={'Open this event in the live show' + (online ? '' : ' (works offline)')} className="rail-live">{ICONS.live}<span>Live show</span><i className={online ? 'ok' : 'warn'} /></a>
     </nav>
   );
 }

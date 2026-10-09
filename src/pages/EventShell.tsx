@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase, liveShowUrl } from '../lib/supabase';
 import { TopBar } from '../components/TopBar';
 import { Rail, SECTIONS } from '../components/Rail';
 
 /* The event workspace. Screens are being rebuilt one at a time; until each lands here,
-   the tested single-file Neon Loop (served at /legacy/) runs that part of the show. */
+   the live show (the original Neon Loop, served at /legacy/) runs that part, on the same sign-in. */
 const ABOUT: Record<string, string> = {
   rundown: 'Segments, timing against the schedule, breaks, transitions, music and the output window.',
   content: 'The event gallery, content rules, uploads and the Content Designer.',
@@ -28,8 +28,8 @@ export function EventShell() {
           <h2 style={{ fontSize: 22, marginBottom: 6 }}>{label}</h2>
           <p className="muted" style={{ marginTop: 0 }}>{ABOUT[section]}</p>
           <div className="notice">
-            This screen is being rebuilt in the new app. For now, run it in the current Neon Loop: it opens this same cloud event once you sign in there.
-            <div className="row" style={{ marginTop: 12 }}><a href="/legacy/"><button className="primary">Open current Neon Loop</button></a><a href="/legacy/#remote"><button>Open remote</button></a></div>
+            {label} is being rebuilt here. Until it is, it runs in the live show, which opens this event straight away. You are already signed in there.
+            <div className="row" style={{ marginTop: 12 }}><a href={liveShowUrl(id, section)}><button className="primary">Open {label.toLowerCase()} in the live show</button></a><a href="/remote"><button>Open remote</button></a></div>
           </div>
         </div>
       </div>

@@ -57,7 +57,6 @@ export function Events() {
       <Hero title={first ? 'Welcome, ' + first : 'Welcome'} sub={greeting(rows, next)}>
         {producer && <button className="primary" onClick={newEvent}>+ Create an event</button>}
         {next && <button className="primary" onClick={() => nav('/events/' + next.id)}>Open {next.name}</button>}
-        <a href="/legacy/"><button>Open current Neon Loop</button></a>
       </Hero>
       <div className="section-heading"><h2>Your events {rows && rows.length ? <span>({rows.length})</span> : null}</h2><p>Every moment, in one place.</p></div>
       {err && <p className="err">{err}</p>}
