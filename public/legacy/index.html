@@ -2414,7 +2414,13 @@ $('events').addEventListener('click', e => {
   }
 });
 $('btnNew').onclick = $('btnHeroNew').onclick = () => eventDialog(null);
-$('btnHome').onclick = goHome;
+$('btnHome').onclick = () => {
+  if (location.pathname.indexOf('/legacy') === 0 && navigator.onLine) {   // inside the main app: its events page is the one to go back to
+    if (state && (run.current >= 0 || run.hold) && outOpen() && !confirm('Leave this event? The screen will go to black.')) return;
+    save(); location.href = '/'; return;
+  }
+  goHome();
+};
 $('btnSettings').onclick = () => eventDialog(state);
 $('btnRules').onclick = () => eventDialog(state, true);
 $('btnSetRules').onclick = () => eventDialog(state, true);
@@ -2494,7 +2500,20 @@ async function raw(method, path, body, auth, extra) {
   }
   return res;
 }
+function adoptShared() {                             // the main Neon Loop app and this page share one sign-in, kept in localStorage
+  const s2 = lsGet('neonloop.session'), cfg = lsGet('neonloop.cloud');
+  if (cfg && (!cloud.cfg || cfg.url !== cloud.cfg.url || cfg.key !== cloud.cfg.key)) cloud.cfg = cfg;
+  if (!s2 && cloud.ses) { cloud.ses = null; cloud.profile = null; return true; }
+  if (s2 && (!cloud.ses || s2.access_token !== cloud.ses.access_token)) { cloud.ses = s2; cloud.profile = lsGet('neonloop.profile') || cloud.profile; return true; }
+  return false;
+}
+window.addEventListener('storage', e => {
+  if (e.key !== 'neonloop.session' && e.key !== 'neonloop.cloud' && e.key !== 'neonloop.profile') return;
+  const was = signedIn(); if (e.key === 'neonloop.profile') cloud.profile = lsGet('neonloop.profile'); adoptShared(); cloudUi();
+  if (!was && signedIn() && typeof sync === 'function') sync(true);
+});
 async function fresh() {
+  adoptShared();                                     // another tab may already have renewed it; never renew the same token twice
   if (!cloud.ses) { const er = new Error('Signed out'); er.status = 401; throw er; }
   if (cloud.ses.expires_at * 1000 - Date.now() > 60000) return;
   try { setSession(await (await raw('POST', '/auth/v1/token?grant_type=refresh_token', { refresh_token: cloud.ses.refresh_token }, false)).json()); }
@@ -2580,7 +2599,7 @@ async function sync(full) {
     await downloads();
     cloud.offline = false;
   } catch (e) { if (e.network) cloud.offline = true; else if (signedIn()) cloud.error = e.message || 'Sync failed'; }
-  syncing = false; cloud.busy = false; persist(); cloudUi(); if (!state) renderHome();
+  syncing = false; cloud.busy = false; persist(); cloudUi(); if (!openAsked() && !state) renderHome();
   if (againWanted && signedIn()) { const f = againFull; againWanted = againFull = false; sync(f); }
 }
 async function pushDeletes() {
@@ -3841,6 +3860,15 @@ document.addEventListener('keydown', e => {
 
 /* ---------- start ---------- */
 let ready = false;
+const askEv = new URLSearchParams(location.search).get('event'), askView = new URLSearchParams(location.search).get('view');
+let askDone = !askEv;
+function openAsked() {                               // true only at the moment the requested event is opened
+  if (askDone) return false;
+  const ev = book.events.find(e => e.id === askEv); if (!ev) return false;
+  askDone = true; openEvent(ev.id, VIEWS.indexOf(askView) >= 0 ? askView : 'run');
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+  return true;
+}
 if (REMOTE) { remoteStart(); return; }
 render();
 openDb().then(d => { db = d; return store('readonly', s => s.getAll()); })
@@ -3850,7 +3878,7 @@ openDb().then(d => { db = d; return store('readonly', s => s.getAll()); })
     allAssets.forEach(a => { if (!a.eventId && adopt) { a.eventId = adopt; putAsset(a); } });
   })
   .catch(() => toast('This browser will not keep content after a refresh (storage is unavailable).'))
-  .then(() => { ready = true; applyHero(); if (book.currentId) openEvent(book.currentId); else render(); cloudUi(); if (signedIn()) sync(true); });
+  .then(() => { ready = true; applyHero(); if (!openAsked()) { if (book.currentId) openEvent(book.currentId); else render(); } cloudUi(); if (signedIn()) sync(true); });
 })();
 </script>
 </body>

@@ -7,7 +7,10 @@ the thank-you wall, timing against the schedule, breaks, and remote control from
 ## Where things stand
 
 Neon Loop started as one self-contained HTML file. That file is complete and tested, and it ships
-inside this app at **`/legacy/`** so it keeps running shows while the React rebuild catches up.
+inside this app at **`/legacy/`** (shown to people as the *live show*) so it keeps running shows while the
+React rebuild catches up. The two share one sign-in (`neonloop.session` in localStorage), the live show
+finds the Supabase project from the app's settings, and `/legacy/?event=<id>&view=run|lib|gst|plg|set`
+opens an event straight into a section. Each screen moves over as it is rebuilt; then `/legacy/` goes.
 
 | Part | Status |
 | --- | --- |
@@ -41,6 +44,7 @@ npm run dev
 | `npm run build` | Type-check and build to `dist/` |
 | `npm test` | Unit tests for `src/domain` |
 | `npm run test:legacy` | End-to-end suites against `/legacy/` (needs `npx playwright install chromium`) |
+| `npm run test:app` | Builds the app against a mock Supabase and checks the shared sign-in with the live show |
 
 ## Environment variables
 
