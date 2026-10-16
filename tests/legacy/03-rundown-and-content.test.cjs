@@ -43,6 +43,8 @@ const M = n => __dirname + '/media/' + n, URL0 = 'file://' + require('path').res
   ck('5 bad files rejected with reasons', rej.length === 5 && rej.some(x => x.includes('800×600')) && rej.some(x => x.includes('GIF files are not accepted')) && rej.some(x => x.includes('could not be opened')));
   await p.fill('#webName', 'Pledge dashboard'); await p.fill('#webUrl', 'http://localhost:8765/'); await p.click('#btnWeb');
   ck('4 assets in library', (await p.locator('.asset').count()) === 4);
+  ck('a new video plays once until Loop is ticked', !(await p.locator('.asset', { hasText: 'Video' }).locator('input[data-k=loop]').isChecked()));
+  await p.locator('.asset', { hasText: 'Video' }).locator('input[data-k=loop]').check();     // this one is a background loop
   await p.locator('.asset', { hasText: 'Image' }).first().locator('button[data-act=hold]').click();
   await p.click('#tabRun'); ck('standby at start', (await p.textContent('#airLab')) === 'STANDBY');
   const heads = () => p.locator('#rhead th').allTextContents(), startOf = i => p.locator('#rows tr').nth(i).locator('td.stt').textContent();

@@ -499,6 +499,8 @@ body.v-lib #eventUI>.wrap,body.v-set #eventUI>.wrap{padding-top:26px}
 }
 
 /* Content picker */
+select.aft{display:block;width:100%;margin-top:4px;font-size:12px;padding:3px 6px}
+#airVid{color:#ffcf6b}#airVid:empty{display:none}
 .pickbtn{display:flex;align-items:center;gap:8px;width:100%;min-width:150px;padding:4px 8px 4px 4px;text-align:left;background:#15121e;border:1px solid #41374c;border-radius:8px}
 .pickbtn .cont{flex:1;min-width:0} .pickbtn .cont .nm{max-width:none;flex:1;min-width:0} .pickbtn .car{color:var(--muted);font-size:11px}
 .pickbtn .th.sm{width:52px;pointer-events:none}
@@ -807,6 +809,7 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
         <div class="lab" id="airLab">STANDBY</div>
         <div class="ttl" id="airTtl">—</div>
         <div class="sub" id="airSub"></div>
+        <div class="sub vid" id="airVid"></div>
       </div>
       <div class="timer num" id="airTimer">0:00</div>
     </div>
@@ -1323,6 +1326,7 @@ if (OUTPUT) (function () {
       else if (a.kind === 'video') {
         el = document.createElement('video'); el.className = 'layer';
         el.loop = a.loop !== false; el.muted = !a.sound; el.volume = vidVol; el.playsInline = true; el.src = blobUrl(a);
+        const vk = m.key, v = el; el.addEventListener('ended', () => { if (cur === v) try { ctrl.postMessage({ nl: 1, type: 'ended', key: vk }, '*'); } catch (e) {} });
         ready = new Promise(r => { el.addEventListener('loadeddata', r, { once: true }); el.addEventListener('error', r, { once: true }); });
         screen.appendChild(el);
         el.play().catch(() => { el.muted = true; el.play().catch(() => {}); });
@@ -1570,7 +1574,7 @@ function setMon(box, a, ms, org) {                  // ms > 0: dissolve to the n
   let el;
   if (isTally(a)) el = tallyBox(org, tallyPack().d, 'tly');
   else if (a.kind === 'web' && !IMG_URL.test(a.url)) { el = document.createElement('iframe'); el.src = a.url; el.tabIndex = -1; el.setAttribute('aria-hidden', 'true'); }
-  else if (a.kind === 'video') { el = document.createElement('video'); el.muted = true; el.loop = a.loop !== false; el.playsInline = true; el.autoplay = true; el.src = objUrl(a); }
+  else if (a.kind === 'video') { el = document.createElement('video'); el.muted = true; el.loop = a.loop !== false || (box.id === 'monPgm' && run.hold); el.playsInline = true; el.autoplay = true; el.src = objUrl(a); }
   else { el = new Image(); el.alt = ''; el.src = a.kind === 'web' ? a.url : objUrl(a); }
   box.insertBefore(el, box.querySelector('.bdg'));    // above the outgoing picture, below the label
   if (ms > 0 && old.length) { el.style.animation = 'nlOn ' + ms + 'ms ease both'; setTimeout(clear, ms + 40); } else clear();
@@ -1653,11 +1657,13 @@ function webUrls() {
 function pushShow() {
   const a = byId(wantId());
   const it = state && !run.hold ? state.items[run.current] : null;
-  postOut({ type: 'show', key: showKey(), trans: state ? (it && it.trans) || state.trans || 'fade' : 'cut', ms: state ? state.fadeMs || 400 : 0, asset: a && (a.kind === 'web' || a.blob) ? { id: a.id, rev: a.rev || 0, kind: a.kind, url: a.url, blob: a.blob, loop: a.loop, sound: a.sound, org: airOrg(a) } : null });
+  postOut({ type: 'show', key: showKey(), trans: state ? (it && it.trans) || state.trans || 'fade' : 'cut', ms: state ? state.fadeMs || 400 : 0, asset: a && (a.kind === 'web' || a.blob) ? { id: a.id, rev: a.rev || 0, kind: a.kind, url: a.url, blob: a.blob, loop: run.hold ? true : a.loop, sound: a.sound, org: airOrg(a) } : null });
 }
 function pushConfig() { postOut({ type: 'config', cfg: cfgKey(), fadeMs: state ? state.fadeMs : 0, webs: webUrls() }); }
 window.addEventListener('message', e => {
-  const m = e.data; if (!m || m.nl !== 1 || m.type !== 'ping') return;
+  const m = e.data; if (!m || m.nl !== 1) return;
+  if (m.type === 'ended') { if (ready && state && m.key === showKey()) afterVideo(); return; }
+  if (m.type !== 'ping') return;
   outWin = e.source; lastPing = Date.now();
   if (!ready) return;
   if (m.cfg !== cfgKey()) pushConfig();
@@ -1700,7 +1706,7 @@ function pushMon() {
   const tk = !run.hold && cur && cur.trans ? cur.trans : state.trans || 'fade';
   postPop('monitors', { type: 'mon', v: p.v, event: state.eventName, card: run.hold ? 'hold' : cur ? 'air' : 'idle', hold: run.hold, ms: tk === 'cut' ? 0 : state.fadeMs || 400,
     airLab: $('airLab').textContent, airTtl: $('airTtl').textContent, airSub: $('airSub').textContent, nxtTtl: $('nxtTtl').textContent, nxtSub: $('nxtSub').textContent,
-    tally: tallyPack().d, pgm: pack(ok(airA), { org: airOrg(airA) }), pvw: pack(ok(nxtA), { org: tallyOrg(nxtA, nxt) }), sources: assets.filter(a => a.kind !== 'audio').map(a => pack(a, { pgm: a === airA, pvw: a === nxtA })) });
+    tally: tallyPack().d, pgm: pack(ok(airA), { org: airOrg(airA), loop: run.hold ? true : airA ? airA.loop : undefined }), pvw: pack(ok(nxtA), { org: tallyOrg(nxtA, nxt) }), sources: assets.filter(a => a.kind !== 'audio').map(a => pack(a, { pgm: a === airA, pvw: a === nxtA })) });
 }
 function pushSnd() {
   const p = pops.sound; if (!p.win || p.win.closed) return;
@@ -1851,6 +1857,35 @@ function daySecs(t) { const d = new Date(t); return d.getHours() * 3600 + d.getM
 function gap(a, b) { let d = a - b; if (d > 43200) d -= 86400; else if (d < -43200) d += 86400; return d; }   // difference between two times of day, across midnight
 function span(sec) { sec = Math.abs(Math.round(sec)); return sec < 60 ? sec + ' sec' : fmt(sec); }
 const isBreak = it => it.type === 'break' || it.type === 'flex';
+/* videos that play once: their real length sets the row's time, and when they finish the show moves on by itself */
+const playsOnce = a => !!a && a.kind === 'video' && a.loop === false;
+function vidSecs(a) { return playsOnce(a) && a.secs > 0 ? Math.ceil(a.secs) : 0; }
+function fitRows(a) {                                // rows whose time nobody typed take the video's length
+  const n = vidSecs(a); if (!n || !state) return false; let ch = false;
+  state.items.forEach(it => { if (it.asset === a.id && !it.durSet && it.dur !== n) { it.dur = n; ch = true; } }); return ch;
+}
+const measuring = new Set();
+function measureVideos() {                           // reads the length of videos that arrived without one (older uploads, downloads)
+  assets.forEach(a => {
+    if (a.kind !== 'video' || !a.blob || a.secs > 0 || measuring.has(a.id)) return; measuring.add(a.id);
+    probe(a.blob).then(d => { if (!(d.secs > 0)) return; a.secs = d.secs; putAsset(a); if (fitRows(a)) save(); render(); }).catch(() => {});
+  });
+}
+function vidLeft() {                                 // seconds left in the play-once video on air, or null
+  const it = state && !run.hold ? state.items[run.current] : null, a = it && byId(it.asset);
+  if (!playsOnce(a) || !(a.secs > 0) || run.vDone === run.startedAt) return null;
+  return a.secs - (Date.now() - run.startedAt) / 1000;
+}
+function afterVideo() {                              // the video on air has finished: go to holding, or take the next row
+  const it = state.items[run.current]; if (vidLeft() === null) return;
+  run.vDone = run.startedAt;
+  if (it.after === 'next' && run.cued < state.items.length) { take(run.cued); return; }
+  run.hold = true; save(); pushShow(); render();
+}
+function afterNote(it) {
+  const a = byId(it.asset); if (!playsOnce(a)) return '';
+  return '<div class="note">Plays once' + (a.secs > 0 ? ' (' + fmt(Math.ceil(a.secs)) + ')' : '') + ', then ' + (it.after === 'next' ? 'next row' : 'holding') + '</div>';
+}
 function effDur(it) { const a = (run.act || {})[it.k]; return a && a.d != null ? a.d : it.dur || 0; }      // a flexible break taken late runs shorter than planned
 function shrink(it, behind) { const d = it.dur || 0; return it.type === 'flex' && behind > 0 ? Math.max(Math.round(d / 2), Math.round(d - behind)) : d; }   // never below half its planned length
 /* when each segment still to come is now expected to start (seconds of the day), and how long is left in the show */
@@ -1971,11 +2006,12 @@ function render() {
       if (edit) {
         return '<tr class="' + (isBreak(it) ? 'brk' : '') + '" data-i="' + i + '"><td class="idx num"><span class="grip" draggable="true" title="Drag to move this segment">⠿</span>' + (i + 1) + '</td><td class="stt num">' + starts[i] + '</td>' +
           '<td><input data-f="title" value="' + esc(it.title) + '" aria-label="Segment"></td>' + who +
-          '<td><button class="pickbtn" data-act="pick" title="Choose content for this segment">' + contentCell(it) + '<span class="car">▾</span></button></td>' + rest +
+          '<td><button class="pickbtn" data-act="pick" title="Choose content for this segment">' + contentCell(it) + '<span class="car">▾</span></button>' +
+            (playsOnce(byId(it.asset)) ? '<select data-f="after" class="aft" aria-label="After the video">' + [['', 'Then holding'], ['next', 'Then next row']].map(o => '<option value="' + o[0] + '"' + ((it.after || '') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>' : '') + '</td>' + rest +
           '<td><select data-f="trans" aria-label="Transition into this segment">' + transOptions(it.trans || '', true) + '</select></td>' +
           '<td class="typ"><select data-f="type" aria-label="Type of segment">' + [['', 'Segment'], ['break', 'Break, fixed length'], ['flex', 'Break, can shorten']].map(o => '<option value="' + o[0] + '"' + ((it.type || '') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') +
           '</select><input type="time" data-f="fix" value="' + esc(it.fix || '') + '" aria-label="Fixed start time" title="Fixed start time, if this must begin at a set time"></td>' +
-          '<td class="dur"><input data-f="dur" class="num" value="' + fmt(it.dur) + '" aria-label="Planned duration"></td>' +
+          '<td class="dur"><input data-f="dur" class="num" value="' + fmt(it.dur) + '" aria-label="Planned duration"' + (vidSecs(byId(it.asset)) ? ' title="The video runs ' + fmt(vidSecs(byId(it.asset))) + '"' : '') + '></td>' +
           '<td><input data-f="notes" value="' + esc(it.notes) + '" aria-label="Notes"></td>' +
           '<td class="st"><div class="rowbtns"><button data-act="ins" title="Add a segment below this one">+</button><button data-act="up" title="Move up">↑</button>' +
           '<button data-act="down" title="Move down">↓</button><button data-act="del" title="Delete">✕</button></div></td></tr>';
@@ -1991,19 +2027,19 @@ function render() {
       if (a.s && a.e && i !== run.current) { const ran = (a.e - a.s) / 1000, d = ran - (it.dur || 0); actD = '<span class="act ' + (d > 59 ? 'late' : d < -59 ? 'good' : '') + '">ran ' + fmt(ran) + '</span>'; }
       return '<tr class="' + cls + '" data-i="' + i + '"><td class="idx num">' + (i + 1) + '</td><td class="stt num hide-sm">' + starts[i] + actS + '</td>' +
         '<td>' + esc(it.title) + (it.notes ? '<div class="note">' + esc(it.notes) + '</div>' : '') + (chips ? '<div>' + chips + '</div>' : '') + '</td>' + who +
-        '<td>' + contentCell(it) + '</td>' + rest + '<td class="dur num">' + fmt(it.dur) + (a.d != null && i === run.current ? '<span class="act good">shortened to ' + fmt(a.d) + '</span>' : '') + actD + '</td><td class="st">' + tag + '</td></tr>';
+        '<td>' + contentCell(it) + afterNote(it) + '</td>' + rest + '<td class="dur num">' + fmt(it.dur) + (vidSecs(byId(it.asset)) && Math.abs(vidSecs(byId(it.asset)) - (it.dur || 0)) >= 1 ? '<span class="act">video ' + fmt(vidSecs(byId(it.asset))) + '</span>' : '') + (a.d != null && i === run.current ? '<span class="act good">shortened to ' + fmt(a.d) + '</span>' : '') + actD + '</td><td class="st">' + tag + '</td></tr>';
     }).join('');
   }
   if (view === 'lib') renderLib();
   if (edit) { $('edHold').innerHTML = options(state.holdingAsset); $('edFade').value = String(state.fadeMs); $('edTrans').innerHTML = transOptions(state.trans); $('edStart').value = state.showStart || ''; $('edFinish').value = state.showEnd || ''; $('edHoldMus').innerHTML = musicOptions(state.holdingMusic); refreshStarts(); }
-  tick(); pushMon(); pushTally(); toBarUi(); hostSync();
+  measureVideos(); tick(); pushMon(); pushTally(); toBarUi(); hostSync();
 }
 function renderLib() {
   if (!assets.length && !state.rules) { $('lib').innerHTML = ''; return; }
   if (!assets.length) { $('lib').innerHTML = '<div class="empty" style="grid-column:1/-1">No content yet. Add a graphic, a video, or a web page such as the pledge dashboard.</div>'; return; }
   $('lib').innerHTML = assets.map(a => {
     const aud = a.kind === 'audio', used = state.items.filter(i => (aud ? i.music : i.asset) === a.id).length, isHold = (aud ? state.holdingMusic : state.holdingAsset) === a.id;
-    const kind = isTally(a) ? 'Live graphic' : a.kind === 'web' ? 'Web page' : aud ? 'Audio' + (a.secs ? ' · ' + fmt(a.secs) : '') : a.kind === 'video' ? 'Video' : 'Image';
+    const kind = isTally(a) ? 'Live graphic' : a.kind === 'web' ? 'Web page' : aud ? 'Audio' + (a.secs ? ' · ' + fmt(a.secs) : '') : a.kind === 'video' ? 'Video' + (a.secs > 0 ? ' · ' + fmt(Math.ceil(a.secs)) : '') + (a.loop === false ? ', plays once' : ', loops') : 'Image';
     return '<div class="asset' + (isHold ? ' holding' : '') + '" data-id="' + a.id + '">' +
       (aud && a.blob ? '<audio class="prev" controls preload="none" src="' + objUrl(a) + '"></audio>' : thumb(a, 'lg')) +
       '<input data-k="name" value="' + esc(a.name) + '" aria-label="Name">' +
@@ -2037,6 +2073,9 @@ function tick() {
     t.innerHTML = fmt(left) + '<small>' + (left < 0 ? 'over' : 'left') + ' of ' + fmt(effDur(cur)) + '</small>';
     t.classList.toggle('over', left < 0);
   } else { t.textContent = '0:00'; t.classList.remove('over'); }
+  const vl = vidLeft();
+  $('airVid').textContent = vl === null ? '' : 'Video ' + (vl > 0 ? fmt(Math.ceil(vl)) + ' left' : 'ending') + ', then ' + (cur.after === 'next' && run.cued < state.items.length ? 'next row' : 'holding');
+  if (vl !== null && vl < (outOpen() ? -3 : -0.4)) afterVideo();       // the output's own "ended" normally arrives first
   const rem = forecast(!!cur && !!run.t0).rem;
   $('remain').textContent = fmt(rem);
   if (popOpen('monitors')) postPop('monitors', { type: 'tick', timer: t.innerHTML, over: t.classList.contains('over'), remain: $('remain').textContent });
@@ -2062,7 +2101,7 @@ function onField(e) {
   const tr = e.target.closest('tr'), f = e.target.dataset.f; if (!tr || !f) return;
   const it = state.items[+tr.dataset.i];
   if (e.type === 'input' || e.target.tagName === 'SELECT') fieldTouch(e.target);   // a text box's closing 'change' adds nothing new
-  it[f] = f === 'dur' ? parseDur(e.target.value) : e.target.value; save(); if (f === 'dur' || f === 'fix') refreshStarts(); if (f === 'type') tr.classList.toggle('brk', isBreak(it));
+  it[f] = f === 'dur' ? parseDur(e.target.value) : e.target.value; if (f === 'dur') it.durSet = true; save(); if (f === 'dur' || f === 'fix') refreshStarts(); if (f === 'type') tr.classList.toggle('brk', isBreak(it));
 }
 $('rows').addEventListener('input', onField); $('rows').addEventListener('change', onField);
 /* Any change to the order keeps "on air" and "next" attached to the same segments, not to row numbers */
@@ -2128,7 +2167,7 @@ function renderPicker() {
 function chooseContent(id) {
   const it = state.items[pickRow]; if (!it) return;
   const f = pickMusic ? 'music' : 'asset';
-  if ((it[f] || '') !== id) { if (edit) histPush(); it[f] = id; save(); airKey = nxtKey = null; }
+  if ((it[f] || '') !== id) { if (edit) histPush(); it[f] = id; const n = pickMusic ? 0 : vidSecs(byId(id)); if (n && !it.durSet) it.dur = n; save(); airKey = nxtKey = null; }
   $('pickDlg').close(); render();
 }
 $('pkGrid').addEventListener('click', e => { const b = e.target.closest('.pk'); if (b) chooseContent(b.dataset.id); });
@@ -2232,7 +2271,7 @@ function probe(file) {                               // real pixel size of an im
       au.onloadedmetadata = () => { URL.revokeObjectURL(u); res({ w: 0, h: 0, secs: isFinite(au.duration) ? au.duration : 0 }); }; au.onerror = fail; au.src = u;
     } else if (/^video\//.test(file.type)) {
       const v = document.createElement('video'); v.preload = 'metadata'; v.muted = true;
-      v.onloadedmetadata = () => { URL.revokeObjectURL(u); res({ w: v.videoWidth, h: v.videoHeight }); }; v.onerror = fail; v.src = u;
+      v.onloadedmetadata = () => { URL.revokeObjectURL(u); res({ w: v.videoWidth, h: v.videoHeight, secs: isFinite(v.duration) ? v.duration : 0 }); }; v.onerror = fail; v.src = u;
     } else {
       const i = new Image(); i.onload = () => { URL.revokeObjectURL(u); res({ w: i.naturalWidth, h: i.naturalHeight }); }; i.onerror = fail; i.src = u;
     }
@@ -2258,7 +2297,7 @@ async function addFiles(files) {
     let d;
     try { d = await probe(f); } catch (e) { rejects.push(f.name + ': could not be opened as ' + (aud ? 'audio' : vid ? 'a video' : 'an image') + '. The file may be damaged or in a format this browser cannot play.'); continue; }
     if (checkRules(f.type, d.w, d.h, f.size) === 'dim') { rejects.push(f.name + ': ' + (d.w && d.h ? 'is ' + d.w + '×' + d.h : 'has no fixed size') + ', this event needs ' + sizeRule() + '.'); continue; }
-    const a = { id: newId(), name: f.name.replace(/\.[^.]+$/, ''), kind: aud ? 'audio' : vid ? 'video' : 'image', blob: f, w: d.w, h: d.h, secs: d.secs || 0, fade: 2, loop: true, sound: false, rev: 0 };
+    const a = { id: newId(), name: f.name.replace(/\.[^.]+$/, ''), kind: aud ? 'audio' : vid ? 'video' : 'image', blob: f, w: d.w, h: d.h, secs: d.secs || 0, fade: 2, loop: !vid, sound: false, rev: 0 };
     if (state !== target) return { added: added, rejects: rejects };   // the event was closed while files were being checked
     addAsset(a); added.push(a);
   }
@@ -2281,7 +2320,7 @@ $('lib').addEventListener('click', e => {
   const card = e.target.closest('.asset'), act = e.target.dataset.act; if (!card || !act) return;
   const a = byId(card.dataset.id); if (!a) return;
   if (act === 'design') { dzOpen(a); return; }
-  if (act === 'add') { state.items.push({ title: a.name, asset: a.id, dur: 300, notes: '' }); toast('Added "' + a.name + '" to the end of the rundown.'); }
+  if (act === 'add') { state.items.push({ title: a.name, asset: a.id, dur: vidSecs(a) || 300, notes: '' }); toast('Added "' + a.name + '" to the end of the rundown.'); }
   else if (act === 'hold' && a.kind === 'audio') state.holdingMusic = state.holdingMusic === a.id ? '' : a.id;
   else if (act === 'hold') state.holdingAsset = state.holdingAsset === a.id ? '' : a.id;
   else if (act === 'del') {
@@ -2299,7 +2338,7 @@ $('lib').addEventListener('change', e => {
   if (k === 'name') a.name = e.target.value.trim() || a.name;
   else if (k === 'url') { a.url = e.target.value.trim(); a.rev = (a.rev || 0) + 1; }
   else if (k === 'fade') a.fade = +e.target.value;
-  else { a[k] = e.target.checked; a.rev = (a.rev || 0) + 1; }
+  else { a[k] = e.target.checked; a.rev = (a.rev || 0) + 1; if (k === 'loop' && fitRows(a)) save(); }
   if (state.cloud && !a.pending) a.dirty = true;
   putAsset(a); render(); cloudTouch();
 });
