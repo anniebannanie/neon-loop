@@ -486,6 +486,30 @@ body.popsnd #musBar{display:none}
 body.v-lib .stage,body.v-set .stage,body.v-lib #srcWrap,body.v-set #srcWrap,body.v-lib #eventUI>footer,body.v-set #eventUI>footer{display:none}
 body.v-lib #musBar,body.v-set #musBar{display:none!important}
 body.v-lib #eventUI>.wrap,body.v-set #eventUI>.wrap{padding-top:26px}
+/* live strip: once the big monitors scroll away, a slim copy stays pinned to the top */
+.lstrip{position:fixed;top:0;left:104px;right:0;z-index:25;--lsh:118px;display:flex;align-items:center;gap:14px;padding:10px 28px;background:#15121df0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #ffffff14;box-shadow:0 12px 30px #0009}
+.lstrip[hidden]{display:none}
+body.edit .lstrip{--lsh:66px;padding:8px 28px}
+@media(max-height:820px){.lstrip{--lsh:92px}}
+.lstrip .mon{height:var(--lsh);width:auto;aspect-ratio:16/9;flex:none;border-radius:8px}
+.lstrip .mon .bdg{font-size:9px;padding:2px 6px}
+#lsPvw{border-color:var(--next)} #lsPvw .bdg{color:var(--next)}
+#lsPgm{border-color:var(--air)} #lsPgm .bdg{color:#fff;background:var(--air)}
+.lstrip.hold #lsPgm{border-color:var(--warn)} .lstrip.hold #lsPgm .bdg{color:#1b1200;background:var(--warn)}
+.lstrip.idle #lsPgm{border-color:var(--line)} .lstrip.idle #lsPgm .bdg{background:none;color:var(--muted)}
+.ls-txt{min-width:0;flex:1 1 0} .ls-air{flex:1.4 1 0}
+.ls-txt .lab{font-size:10px;letter-spacing:.14em;color:var(--muted);font-weight:700} .ls-nxt .lab{color:var(--next)} .lstrip:not(.hold):not(.idle) #lsLab{color:var(--air)} .lstrip.hold #lsLab{color:var(--warn)}
+.ls-txt .ttl{font-family:var(--font-display);font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-txt .sub{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} #lsVid{color:#ffcf6b} #lsVid:empty{display:none}
+.lstrip .timer{font-size:26px;flex:none;text-align:right} .lstrip .timer small{display:block;font-size:10px}
+body.edit .lstrip .ls-txt .ttl{font-size:14px} body.edit .lstrip .timer{font-size:20px}
+.ls-acts{display:flex;flex-direction:column;gap:6px;flex:none} .ls-acts button{min-width:128px;padding:8px 12px;font-weight:700;letter-spacing:.06em;font-size:12px}
+#lsTake{background:var(--grad);border:0;color:#fff} #lsHold.on{background:var(--warn);color:#1b1200;border-color:var(--warn)}
+body.edit .ls-acts{flex-direction:row}
+.backair{position:fixed;right:28px;bottom:24px;z-index:26;padding:11px 18px;border-radius:999px;font-weight:700;background:var(--air);border:0;color:#fff;box-shadow:0 12px 28px #000a}
+.backair[hidden]{display:none}
+@media(max-width:1100px){.lstrip .ls-nxt{display:none}}
+@media(max-width:760px){.lstrip{left:0;padding:8px 12px;gap:10px;--lsh:56px}.lstrip #lsPvw{display:none}.lstrip .timer{font-size:18px}.ls-acts button{min-width:0;padding:8px 10px}.backair{bottom:96px;right:16px}}
 #airMini i{background:var(--air)} #airMini{color:var(--text);max-width:34vw;overflow:hidden;text-overflow:ellipsis}
 .setgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
 .setcard{background:linear-gradient(145deg,#25202f,#1b1725);border:1px solid #ffffff15;border-radius:18px;padding:18px;box-shadow:var(--depth);display:flex;flex-direction:column;gap:10px;align-items:flex-start}
@@ -819,6 +843,15 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
     <button id="btnHold">HOLDING</button>
   </div>
 </section>
+<div id="liveStrip" class="lstrip" hidden>
+  <div class="mon" id="lsPvw"><span class="bdg">PREVIEW</span></div>
+  <div class="ls-txt ls-nxt"><div class="lab">NEXT</div><div class="ttl" id="lsNxt"></div></div>
+  <div class="mon pgm" id="lsPgm"><span class="bdg">PROGRAM</span></div>
+  <div class="ls-txt ls-air"><div class="lab" id="lsLab">ON AIR</div><div class="ttl" id="lsAir"></div><div class="sub vid" id="lsVid"></div></div>
+  <div class="timer num" id="lsTimer"></div>
+  <div class="ls-acts"><button id="lsTake">TAKE NEXT</button><button id="lsHold">HOLDING</button></div>
+</div>
+<button id="backAir" class="backair" hidden>Back to on air</button>
 
 <div class="musicbar" id="musBar" style="display:none">
   <span class="lab">SOUND</span><span id="musName">Silence</span>
@@ -1574,13 +1607,13 @@ function setMon(box, a, ms, org) {                  // ms > 0: dissolve to the n
   let el;
   if (isTally(a)) el = tallyBox(org, tallyPack().d, 'tly');
   else if (a.kind === 'web' && !IMG_URL.test(a.url)) { el = document.createElement('iframe'); el.src = a.url; el.tabIndex = -1; el.setAttribute('aria-hidden', 'true'); }
-  else if (a.kind === 'video') { el = document.createElement('video'); el.muted = true; el.loop = a.loop !== false || (box.id === 'monPgm' && run.hold); el.playsInline = true; el.autoplay = true; el.src = objUrl(a); }
+  else if (a.kind === 'video') { el = document.createElement('video'); el.muted = true; el.loop = a.loop !== false || ((box.id === 'monPgm' || box.id === 'lsPgm') && run.hold); el.playsInline = true; el.autoplay = true; el.src = objUrl(a); }
   else { el = new Image(); el.alt = ''; el.src = a.kind === 'web' ? a.url : objUrl(a); }
   box.insertBefore(el, box.querySelector('.bdg'));    // above the outgoing picture, below the label
   if (ms > 0 && old.length) { el.style.animation = 'nlOn ' + ms + 'ms ease both'; setTimeout(clear, ms + 40); } else clear();
 }
 const ro = new ResizeObserver(es => es.forEach(e => e.target.style.setProperty('--s', e.contentRect.width / 1920)));
-ro.observe($('monPgm')); ro.observe($('monPvw')); ro.observe($('monPlg'));
+ro.observe($('monPgm')); ro.observe($('monPvw')); ro.observe($('monPlg')); ro.observe($('lsPgm')); ro.observe($('lsPvw'));
 let srcList = '';
 function renderSources(airA, nxtA) {
   const vis = assets.filter(a => a.kind !== 'audio'), list = vis.map(a => a.id + '\u0001' + a.name).join('\u0002');
@@ -1978,6 +2011,7 @@ function render() {
     airKey = akk; setMon($('monPgm'), airA, first || tk === 'cut' ? 0 : state.fadeMs || 400, aOrg);
   }
   if (nkk !== nxtKey) { nxtKey = nkk; setMon($('monPvw'), nxtA, 0, nOrg); }
+  liveNow = { airA: airA, aOrg: aOrg, nxtA: nxtA, nOrg: nOrg, ak: akk, nk: nkk };
   renderSources(airA, nxtA);
   $('btnHold').classList.toggle('on', run.hold);
   $('btnHold').textContent = run.hold ? 'RETURN FROM HOLDING' : 'HOLDING';
@@ -2033,7 +2067,48 @@ function render() {
   if (view === 'lib') renderLib();
   if (edit) { $('edHold').innerHTML = options(state.holdingAsset); $('edFade').value = String(state.fadeMs); $('edTrans').innerHTML = transOptions(state.trans); $('edStart').value = state.showStart || ''; $('edFinish').value = state.showEnd || ''; $('edHoldMus').innerHTML = musicOptions(state.holdingMusic); refreshStarts(); }
   measureVideos(); tick(); pushMon(); pushTally(); toBarUi(); hostSync();
+  if (view === 'run' && !edit && run.current !== followed) { const was = followed; followed = run.current; if (was !== null && run.current >= 0) requestAnimationFrame(() => follow()); }
 }
+/* ---------- keeping the live picture in view on a long rundown ---------- */
+let liveNow = null, followed = null, stripKeys = { a: null, n: null }, stripOn = false;
+function stripWanted() {
+  if (!state || view !== 'run' || document.body.classList.contains('popmon')) return false;
+  return document.querySelector('#eventUI>.stage').getBoundingClientRect().bottom < 70;     // the big monitors have scrolled away
+}
+function stripReserve() { const el = $('liveStrip'); return el.hidden ? parseFloat(getComputedStyle(el).getPropertyValue('--lsh')) + 24 : el.offsetHeight; }
+function stripSync() {
+  const on = stripWanted(), el = $('liveStrip');
+  if (on !== stripOn) { stripOn = on; el.hidden = !on; stripKeys = { a: null, n: null }; if (!on) { setMon($('lsPgm'), null); setMon($('lsPvw'), null); } }
+  if (on && liveNow) {
+    const cur = state.items[run.current];
+    el.className = 'lstrip' + (run.hold ? ' hold' : cur ? '' : ' idle');
+    $('lsLab').textContent = $('airLab').textContent; $('lsAir').textContent = $('airTtl').textContent; $('lsNxt').textContent = $('nxtTtl').textContent;
+    if ($('lsTimer').innerHTML !== $('airTimer').innerHTML) $('lsTimer').innerHTML = $('airTimer').innerHTML;
+    $('lsTimer').classList.toggle('over', $('airTimer').classList.contains('over')); $('lsVid').textContent = $('airVid').textContent;
+    $('lsHold').classList.toggle('on', run.hold); $('lsHold').textContent = run.hold ? 'RETURN' : 'HOLDING';
+    if (stripKeys.a !== liveNow.ak) { const first = stripKeys.a === null; stripKeys.a = liveNow.ak; setMon($('lsPgm'), liveNow.airA, first ? 0 : state.fadeMs || 400, liveNow.aOrg); }
+    if (stripKeys.n !== liveNow.nk) { stripKeys.n = liveNow.nk; setMon($('lsPvw'), liveNow.nxtA, 0, liveNow.nOrg); }
+  }
+  /* "Back to on air" when the live row is out of sight */
+  const tr = view === 'run' && !edit && state ? document.querySelector('#rows tr.air') : null, b = $('backAir');
+  if (!tr) { b.hidden = true; return; }
+  const r = tr.getBoundingClientRect(), top = stripOn ? $('liveStrip').offsetHeight : 0, above = r.bottom < top + 8, below = r.top > innerHeight - 8;
+  b.hidden = !(above || below); if (!b.hidden) b.textContent = (above ? '↑ ' : '↓ ') + 'Back to on air';
+}
+function follow(force) {                             // keep the on-air row near the top, with the one before it still showing
+  if (view !== 'run' || edit || !state) return;
+  const tr = document.querySelector('#rows tr.air'); if (!tr) return;
+  const r = tr.getBoundingClientRect(), res = stripReserve();
+  if (!force && r.top >= res + 8 && r.bottom <= innerHeight * 0.7) return;      // already comfortably in view
+  const anchor = tr.previousElementSibling || tr, y = scrollY + anchor.getBoundingClientRect().top - res - 10;
+  const st = document.querySelector('#eventUI>.stage'), stageEnd = scrollY + st.getBoundingClientRect().bottom;
+  window.scrollTo({ top: Math.max(0, y < stageEnd ? Math.min(y, scrollY + r.top - 20) : y), behavior: 'smooth' });
+}
+let stripRaf = 0;
+addEventListener('scroll', () => { if (!stripRaf) stripRaf = requestAnimationFrame(() => { stripRaf = 0; stripSync(); }); }, { passive: true });
+addEventListener('resize', () => stripSync());
+$('backAir').onclick = () => follow(true);
+$('lsTake').onclick = () => takeNext(); $('lsHold').onclick = () => toggleHold();
 function renderLib() {
   if (!assets.length && !state.rules) { $('lib').innerHTML = ''; return; }
   if (!assets.length) { $('lib').innerHTML = '<div class="empty" style="grid-column:1/-1">No content yet. Add a graphic, a video, or a web page such as the pledge dashboard.</div>'; return; }
@@ -2078,6 +2153,7 @@ function tick() {
   if (vl !== null && vl < (outOpen() ? -3 : -0.4)) afterVideo();       // the output's own "ended" normally arrives first
   const rem = forecast(!!cur && !!run.t0).rem;
   $('remain').textContent = fmt(rem);
+  stripSync();
   if (popOpen('monitors')) postPop('monitors', { type: 'tick', timer: t.innerHTML, over: t.classList.contains('over'), remain: $('remain').textContent });
 }
 setInterval(tick, 250);
