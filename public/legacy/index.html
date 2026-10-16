@@ -486,6 +486,42 @@ body.popsnd #musBar{display:none}
 body.v-lib .stage,body.v-set .stage,body.v-lib #srcWrap,body.v-set #srcWrap,body.v-lib #eventUI>footer,body.v-set #eventUI>footer{display:none}
 body.v-lib #musBar,body.v-set #musBar{display:none!important}
 body.v-lib #eventUI>.wrap,body.v-set #eventUI>.wrap{padding-top:26px}
+/* remote: photos */
+.rv-phgo{width:100%;min-height:56px;font-size:17px;margin-top:10px}
+.rv-phs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px}
+.rv-phs span{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#000} .rv-phs img{width:100%;height:100%;object-fit:cover;display:block}
+.rv-phs .wait img{opacity:.45} .rv-phs i{position:absolute;inset:auto 0 0 0;font-style:normal;font-size:11px;text-align:center;padding:3px;background:#000a}
+/* event photos */
+.album{margin:18px 0;padding:18px;border:1px solid #ffffff15;border-radius:18px;background:linear-gradient(145deg,#25202f,#1b1725);box-shadow:var(--depth)}
+.album.over{outline:2px dashed var(--next);outline-offset:4px}
+.al-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap} .al-head>div{flex:1;min-width:200px}
+.al-head h3{margin:0;font-family:var(--font-display);font-size:18px;font-weight:600} .al-sum{margin:3px 0 0;color:var(--muted);font-size:13px}
+.al-cap{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.al-bar{display:flex;align-items:center;gap:10px;margin:16px 0 8px;flex-wrap:wrap} .al-bar b{font-size:12px;letter-spacing:.1em;text-transform:uppercase} .al-note{color:var(--muted);font-size:12px;flex:1}
+.al-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px} .al-grid.sm{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+.al-ph{position:relative;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:4/3;border:1px solid #ffffff14}
+.al-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.al-ph .al-by{position:absolute;left:0;right:0;top:0;padding:4px 8px;font-size:11px;background:linear-gradient(#000a,#0000);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al-ph .al-act{position:absolute;left:6px;right:6px;bottom:6px;display:flex;gap:6px} .al-ph .al-act button{flex:1;padding:6px 4px;font-size:12px}
+.al-ph .al-act .ok{background:var(--grad);border:0;color:#fff}
+.al-grid.sm .al-act{left:auto;right:4px;bottom:4px} .al-grid.sm .al-act button{flex:none;padding:2px 8px}
+.al-ph .wait{display:grid;place-items:center;height:100%;color:var(--muted);font-size:12px}
+#alSkipWrap{margin-top:14px} #alSkipWrap summary{cursor:pointer;color:var(--muted);font-size:13px;margin-bottom:8px}
+.al-tip{margin:14px 0 0;color:var(--muted);font-size:12px}
+.ph-pill{cursor:pointer;border:1px solid #ffd76a66;color:#ffe9a8} .ph-pill i{background:#ffd76a}
+/* the photo loop on screen */
+.tlyin .ph-stage{position:absolute;inset:0;background:#07050c;overflow:hidden}
+.tlyin .ph-f{position:absolute;inset:0;opacity:0;transition:opacity 1.4s ease}
+.tlyin .ph-f.on{opacity:1}
+.tlyin .ph-f i{position:absolute;inset:-80px;background-size:cover;background-position:center;filter:blur(50px) brightness(.42) saturate(1.25)}
+.tlyin .ph-f img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;animation:phKB 9s ease-out both}
+.tlyin .ph-f.k1 img{transform-origin:22% 30%} .tlyin .ph-f.k2 img{transform-origin:78% 30%} .tlyin .ph-f.k3 img{transform-origin:50% 80%}
+@keyframes phKB{from{transform:scale(1)}to{transform:scale(1.08)}}
+.tlyin .ph-empty{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 30% 30%,#5b2a86,#120a1f 70%);font-family:var(--font-display);font-size:64px;color:#e6d6f3;text-align:center;padding:0 160px}
+.tlyin .ph-cap{position:absolute;left:0;right:0;bottom:0;padding:120px 96px 54px;display:flex;align-items:baseline;gap:34px;background:linear-gradient(0deg,#0a0611f0 30%,#0a061100)}
+.tlyin .ph-thx{font-family:var(--font-display);font-size:76px;font-weight:600;letter-spacing:-.02em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tlyin .ph-ev{font-size:40px;color:#e2d4ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tlyin .ph-cap b{margin-left:auto;font-family:var(--font-display);font-size:54px;color:#ffd76a;white-space:nowrap}
 /* live strip: once the big monitors scroll away, a slim copy stays pinned to the top */
 .lstrip{position:fixed;top:0;left:104px;right:0;z-index:25;--lsh:118px;display:flex;align-items:center;gap:14px;padding:10px 28px;background:#15121df0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #ffffff14;box-shadow:0 12px 30px #0009}
 .lstrip[hidden]{display:none}
@@ -810,6 +846,7 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
   <span id="outPill" class="pill"><i></i><span id="outTxt">Output closed</span></span>
   <span id="rmPill" class="pill" style="display:none" title="Remote control"><i></i><span id="rmPillTxt"></span></span>
   <span id="airMini" class="pill" style="display:none"><i></i><span id="airMiniTxt"></span></span>
+  <button id="phPill" class="pill ph-pill" style="display:none" title="New event photos to check"><i></i><span id="phPillTxt"></span></button>
   <div class="tools">
     <button id="btnOut" class="primary">Open output</button>
     <button id="btnPopMon" title="Open the preview and program monitors in their own window, for a second screen">Pop out monitors</button>
@@ -911,6 +948,18 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
       </div>
     </div>
     <div id="rejects" class="rejects" style="display:none"></div>
+    <section class="album" id="album">
+      <div class="al-head">
+        <div><h3>Event photos</h3><p id="alSum" class="al-sum"></p></div>
+        <label class="al-cap"><input type="checkbox" id="alCap"> Thank-you caption on the loop</label>
+        <button id="alAdd" class="primary">Add photos</button>
+        <input id="alFile" type="file" accept="image/*" multiple hidden>
+      </div>
+      <div id="alNewWrap"><div class="al-bar"><b>To check</b><span class="al-note">Only approved photos play on the loop.</span><button id="alAll" class="mini">Approve all</button></div><div class="al-grid" id="alNew"></div></div>
+      <div id="alOkWrap"><div class="al-bar"><b>On the loop</b><span class="al-note">Newest first. Put "Photo loop" on a row, or set it as holding, from the content picker.</span></div><div class="al-grid sm" id="alOk"></div></div>
+      <details id="alSkipWrap"><summary id="alSkipSum"></summary><div class="al-grid sm" id="alSkip"></div></details>
+      <p class="al-tip">Taking photos on a phone? Open Neon Loop remote on the phone and use the Photos tab. You can also drop photos from a camera here.</p>
+    </section>
     <div id="locked" class="locked" style="display:none">
       <b>Uploads are locked for this event</b>
       <p>Set the content rules first, so everyone uploading knows what is accepted.</p>
@@ -1090,8 +1139,8 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
   </div>
   <div class="pk-live" id="pkLive">
     <strong>Live pledge graphics</strong>
-    <span class="hint" style="margin:0">Drawn by Neon Loop from the pledges as they are recorded. The tally shows the organisation set for the segment under "Pledging for", or the whole night if none is set. The thank-you wall lists everyone who has given, by name, with no amounts. The break countdown shows "We resume in" and counts down the segment it is on.</span>
-    <div class="pk-row"><button type="button" data-t="follow">Use the live tally</button><button type="button" data-t="total">Use the night total</button><button type="button" data-t="thanks">Use the thank-you wall</button><button type="button" data-t="break">Use the break countdown</button></div>
+    <span class="hint" style="margin:0">Drawn by Neon Loop from the pledges as they are recorded. The tally shows the organisation set for the segment under "Pledging for", or the whole night if none is set. The thank-you wall lists everyone who has given, by name, with no amounts. The break countdown shows "We resume in" and counts down the segment it is on. The photo loop plays the event photos you have approved under Content.</span>
+    <div class="pk-row"><button type="button" data-t="follow">Use the live tally</button><button type="button" data-t="total">Use the night total</button><button type="button" data-t="thanks">Use the thank-you wall</button><button type="button" data-t="break">Use the break countdown</button><button type="button" data-t="photos">Use the photo loop</button></div>
   </div>
   <div class="pk-link" id="pkLink">
     <strong>Add a link</strong>
@@ -1182,7 +1231,13 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
   <div id="rvSetup" class="rv-card"><h2>Connect</h2><p class="rv-note" id="rvSetupTxt"></p><button id="rvCloud" class="primary" style="margin-top:10px">Connect and sign in</button></div>
   <div id="rvEvents" class="rv-card"><h2>Choose the event</h2><div class="rv-evs" id="rvEvList"></div></div>
   <div id="rvMain">
-    <div class="rv-tabs"><button id="rvTabShow" aria-pressed="false">Show</button><button id="rvTabPlg" aria-pressed="true">Pledges</button></div>
+    <div class="rv-tabs"><button id="rvTabShow" aria-pressed="false">Show</button><button id="rvTabPlg" aria-pressed="true">Pledges</button><button id="rvTabPh" aria-pressed="false">Photos</button></div>
+    <div id="rvPh">
+      <div class="rv-card"><h2>Event photos</h2><p class="rv-note">Snap the crowd, presenters and team. Photos go to the show laptop to be checked, then play on the photo loop.</p>
+        <button id="rvPhGo" class="primary rv-phgo">Take or choose photos</button><input id="rvPhFile" type="file" accept="image/*" multiple hidden>
+        <div id="rvPhMsg" class="rv-msg"></div></div>
+      <div class="rv-card"><h2>Sent from this device</h2><div class="rv-phs" id="rvPhList"></div></div>
+    </div>
     <div id="rvShow">
       <div class="rv-card rv-air" id="rvAirCard"><div class="lab" id="rvAirLab">STANDBY</div><div class="ttl" id="rvAir">Not started</div><div class="tm num" id="rvTimer"></div><div class="rv-nx">Next: <b id="rvNext">—</b></div></div>
       <div class="rv-btns"><button id="rvTake" class="primary">TAKE NEXT</button><button id="rvHold" aria-pressed="false">HOLDING</button></div>
@@ -1231,6 +1286,7 @@ function tallyFill(box, d) {
   const $$ = n => '$' + Math.round(n).toLocaleString('en-AU');
   if (!d) { inn.innerHTML = '<div class="t-empty">Pledge tally</div>'; box._v = 0; box._sig = ''; return; }
   if (box.dataset.org === '@thanks') { thanksFill(box, inn, d); return; }
+  if (box.dataset.org === '@photos') { photoFill(box, inn, d); return; }
   if ((box.dataset.org || '').indexOf('@break') === 0) { breakFill(box, inn, d); return; }
   const org = d.orgs.find(o => o.id === box.dataset.org), target = org ? org.total : d.total, list = d.recent[org ? org.id : ''] || [];
   const sig = JSON.stringify([d.ev, org, d.total, d.count, d.orgs, list]); if (sig === box._sig) return;
@@ -1287,6 +1343,54 @@ function breakFill(box, inn, d) {
   draw(); clearInterval(box._rot);
   if (b.end) box._rot = setInterval(() => { if (!box.isConnected) { clearInterval(box._rot); return; } draw(); }, 250);
 }
+/* ----- the photo loop: event photos drifting and crossfading, newest first. Every window keeps its own copy of the approved photos. ----- */
+const PHOTO_MS = 6500, photoStore = { blobs: new Map(), urls: new Map() };
+function photoUrl(id) {
+  const b = photoStore.blobs.get(id); if (!b) return '';
+  let u = photoStore.urls.get(id); if (!u || u.b !== b) { if (u) URL.revokeObjectURL(u.u); u = { b: b, u: URL.createObjectURL(b) }; photoStore.urls.set(id, u); } return u.u;
+}
+function photoSet(list) {
+  const keep = new Set(); list.forEach(x => { keep.add(x.id); photoStore.blobs.set(x.id, x.blob); });
+  for (const id of Array.from(photoStore.blobs.keys())) if (!keep.has(id)) { photoStore.blobs.delete(id); const u = photoStore.urls.get(id); if (u) { URL.revokeObjectURL(u.u); photoStore.urls.delete(id); } }
+  document.querySelectorAll('.tly').forEach(b => { if (b.dataset.org === '@photos' && !b._curId) photoStep(b); });
+}
+async function shrinkPhoto(f, max) {                  // camera photos are huge: a long side of 2560 is plenty for the screen, and quick to send
+  max = max || 2560; let src;
+  try { src = await createImageBitmap(f, { imageOrientation: 'from-image' }); }
+  catch (e) { src = await new Promise((res, rej) => { const i = new Image(), u = URL.createObjectURL(f); i.onload = () => res(i); i.onerror = () => { URL.revokeObjectURL(u); rej(new Error('unreadable')); }; i.src = u; }); }
+  const w0 = src.width || src.naturalWidth, h0 = src.height || src.naturalHeight; if (!w0 || !h0) throw new Error('unreadable');
+  const k = Math.min(1, max / Math.max(w0, h0)), w = Math.round(w0 * k), h = Math.round(h0 * k), c = document.createElement('canvas'); c.width = w; c.height = h;
+  c.getContext('2d').drawImage(src, 0, 0, w, h); if (src.close) src.close();
+  const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.86)); if (!blob) throw new Error('unreadable');
+  return { blob: blob, w: w, h: h };
+}
+function photoFill(box, inn, d) {
+  const e = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const al = d.album || { ids: [], cap: false }; box._ids = al.ids;
+  if (!box._built) {
+    box._built = 1; box._shown = new Set(); box._curId = '';
+    inn.innerHTML = '<div class="ph-stage"></div><div class="ph-empty"><span>Photos from tonight will appear here</span></div><div class="ph-cap"></div>';
+    clearInterval(box._rot); box._rot = setInterval(() => { if (!box.isConnected) { clearInterval(box._rot); return; } photoStep(box); }, PHOTO_MS);
+  }
+  const cap = inn.querySelector('.ph-cap'), sig = JSON.stringify([al.cap, d.ev, Math.round(d.total)]);
+  if (cap._sig !== sig) { cap._sig = sig; cap.style.display = al.cap ? '' : 'none';
+    cap.innerHTML = '<span class="ph-thx">Thank you</span><span class="ph-ev">' + e(d.ev) + '</span>' + (d.total > 0 ? '<b>$' + Math.round(d.total).toLocaleString('en-AU') + ' raised tonight</b>' : ''); }
+  if (!box._curId || !al.ids.some(id => id === box._curId)) photoStep(box);
+  inn.querySelector('.ph-empty').style.display = box._curId ? 'none' : '';
+}
+function photoStep(box) {
+  const ids = (box._ids || []).filter(id => photoStore.blobs.has(id)), st = box.querySelector('.ph-stage'); if (!st) return;
+  const empty = box.querySelector('.ph-empty');
+  if (!ids.length) { if (box._curId) { st.innerHTML = ''; box._curId = ''; } if (empty) empty.style.display = ''; return; }
+  let next = ids.find(id => !box._shown.has(id));                    // anything not yet shown goes next, newest first
+  if (!next) { const i = ids.indexOf(box._curId); next = ids[(i + 1) % ids.length]; }   // then round again
+  if (next === box._curId) return;
+  box._shown.add(next); box._curId = next; if (empty) empty.style.display = 'none';
+  const u = photoUrl(next), f = document.createElement('div'); f.className = 'ph-f k' + Math.floor(Math.random() * 4);
+  f.innerHTML = '<i style="background-image:url(' + u + ')"></i><img src="' + u + '" alt="">'; st.appendChild(f);
+  const go = () => { f.classList.add('on'); const old = Array.from(st.children).filter(n => n !== f); setTimeout(() => old.forEach(n => n.remove()), 1600); };
+  const im = f.querySelector('img'); (im.decode ? im.decode() : Promise.resolve()).then(go, go);
+}
 function tallyBox(org, d, cls) { const b = document.createElement('div'); b.className = cls; b.dataset.org = org || ''; b.innerHTML = '<div class="tlyin"></div>'; tallyFill(b, d); return b; }
 
 /* A takeover: drawn over whatever box it is given, removes itself when it has played. */
@@ -1318,7 +1422,8 @@ if (OUTPUT) (function () {
   new ResizeObserver(es => es.forEach(e => screen.style.setProperty('--s', e.contentRect.width / 1920))).observe(screen);
   const wait = ms => new Promise(r => setTimeout(r, ms));
 
-  function ping() { try { if (ctrl) ctrl.postMessage({ nl: 1, type: 'ping', key, cfg, av: vidVol, tk }, '*'); } catch (e) {} }
+  let pk = '';
+  function ping() { try { if (ctrl) ctrl.postMessage({ nl: 1, type: 'ping', key, cfg, av: vidVol, tk, pk }, '*'); } catch (e) {} }
   setInterval(ping, 1000); ping();
 
   function goFull() { hint.style.display = 'none'; const d = document.documentElement; if (!document.fullscreenElement && d.requestFullscreen) d.requestFullscreen().catch(() => {}); }
@@ -1401,6 +1506,7 @@ if (OUTPUT) (function () {
     else if (m.type === 'audio') { vidVol = m.vol; screen.querySelectorAll('video').forEach(v => { v.volume = vidVol; }); }
     else if (m.type === 'to') takeoverShow(screen, m.t);
     else if (m.type === 'tally') { tally = m.d; tk = m.k; screen.querySelectorAll('.tly').forEach(b => tallyFill(b, tally)); }
+    else if (m.type === 'photos') { pk = m.k; photoSet(m.list); }
     ping();
   });
 })();
@@ -1491,6 +1597,7 @@ if (POP) (function () {
     if (m.type === 'tick') { $('airTimer').innerHTML = m.timer; $('airTimer').classList.toggle('over', !!m.over); $('remain').textContent = m.remain; return; }
     if (m.type === 'to') { takeoverShow($('monPgm'), m.t); return; }
     if (m.type === 'tally') { tally = m.d; document.querySelectorAll('.tly').forEach(b => tallyFill(b, tally)); return; }
+    if (m.type === 'photos') { photoSet(m.list); return; }
     if (m.type !== 'mon') return;
     v = m.v; tally = m.tally || null; document.title = (m.event ? m.event + ' · ' : '') + 'Neon Loop Monitors';
     $('cardAir').className = 'card ' + (m.idle ? 'idle' : m.card);
@@ -1616,7 +1723,7 @@ const ro = new ResizeObserver(es => es.forEach(e => e.target.style.setProperty('
 ro.observe($('monPgm')); ro.observe($('monPvw')); ro.observe($('monPlg')); ro.observe($('lsPgm')); ro.observe($('lsPvw'));
 let srcList = '';
 function renderSources(airA, nxtA) {
-  const vis = assets.filter(a => a.kind !== 'audio'), list = vis.map(a => a.id + '\u0001' + a.name).join('\u0002');
+  const vis = assets.filter(a => a.kind !== 'audio' && notPhoto(a)), list = vis.map(a => a.id + '\u0001' + a.name).join('\u0002');
   $('srcWrap').style.display = vis.length ? '' : 'none';
   if (list !== srcList) {
     srcList = list;
@@ -1644,7 +1751,7 @@ function wantId() { if (!state) return ''; return run.hold ? state.holdingAsset 
 function showKey() { const a = byId(wantId()); return a ? a.id + ':' + (a.rev || 0) + (isTally(a) ? ':' + airOrg(a) : '') : ''; }
 /* ----- live pledge tally: the figures every window draws from ----- */
 function isTally(a) { return !!a && a.kind === 'web' && TALLY.test(a.url || ''); }
-function tallyOrg(a, it) { return !isTally(a) ? '' : /thanks$/.test(a.url) ? '@thanks' : /break$/.test(a.url) ? '@break|' + (it && it.k || '') : /follow$/.test(a.url) && it && O().some(o => o.id === it.org) ? it.org : ''; }   // which organisation a tally shows for a segment
+function tallyOrg(a, it) { return !isTally(a) ? '' : /thanks$/.test(a.url) ? '@thanks' : /photos$/.test(a.url) ? '@photos' : /break$/.test(a.url) ? '@break|' + (it && it.k || '') : /follow$/.test(a.url) && it && O().some(o => o.id === it.org) ? it.org : ''; }   // which organisation a tally shows for a segment
 function airOrg(a) { return state ? tallyOrg(a, run.hold ? null : state.items[run.current]) : ''; }
 /* who has given: distinct people, never amounts. Used by the thank-you wall and the recognition takeovers. */
 function peopleStats() {
@@ -1671,12 +1778,26 @@ function tallyPack() {
   const ppl = peopleStats(), companies = Object.keys(ppl.comp).filter(c => ppl.comp[c] >= 2).map(c => ({ name: c, n: ppl.comp[c] })).sort((a, b) => b.n - a.n).slice(0, 6);
   const brk = {}, bids = {}; assets.forEach(a => { if (isTally(a) && /break$/.test(a.url)) bids[a.id] = 1; });
   state.items.forEach((it, i) => { if (bids[it.asset] && it.k) { const a = (run.act || {})[it.k]; brk[it.k] = { title: it.title, dur: effDur(it), end: i === run.current && a && a.s ? a.s + effDur(it) * 1000 : 0 }; } });
-  const d = { ev: state.eventName, total: orgs.reduce((n, o) => n + o.total, 0), count: ps.length, orgs: orgs, recent: recent, brk: brk, thanks: { names: mode === 'amount' ? [] : ppl.names, count: ppl.count, firsts: ppl.firsts, companies: companies } }, j = JSON.stringify(d);
+  const d = { ev: state.eventName, total: orgs.reduce((n, o) => n + o.total, 0), count: ps.length, orgs: orgs, recent: recent, brk: brk, thanks: { names: mode === 'amount' ? [] : ppl.names, count: ppl.count, firsts: ppl.firsts, companies: companies },
+    album: { ids: albumList().map(a => a.id), cap: !!state.albumCap } }, j = JSON.stringify(d);
   if (j !== tallyMemo.j) { let h = 5381; for (let i = 0; i < j.length; i++) h = (h * 33 ^ j.charCodeAt(i)) >>> 0; tallyMemo = { j: j, k: h.toString(36) + '.' + j.length, d: d }; }
   return tallyMemo;
 }
 let tallySent = null;
+/* ----- event photos: an album kept apart from the show content, approved one by one before they reach the screen ----- */
+const isPhoto = a => !!a && a.kind === 'image' && (!!a.album || /\/photos\//.test(a.path || ''));
+const notPhoto = a => !isPhoto(a);
+function photoSt(a) { return (state && state.album && state.album[a.id]) || 'new'; }
+function albumList() { return state ? assets.filter(a => isPhoto(a) && a.blob && photoSt(a) === 'ok').sort((x, y) => (y.at || 0) - (x.at || 0)) : []; }
+let photoKey = '';
+function pushPhotos(force) {
+  const list = albumList(), k = list.map(a => a.id + ':' + a.blob.size).join('|');
+  if (!force && k === photoKey) return; photoKey = k;
+  const msg = list.map(a => ({ id: a.id, blob: a.blob }));
+  photoSet(msg); postOut({ type: 'photos', k: k, list: msg }); postPop('monitors', { type: 'photos', list: msg });
+}
 function pushTally(force) {
+  pushPhotos();
   const t = tallyPack(); if (!force && t.k === tallySent) return; tallySent = t.k;
   postOut({ type: 'tally', k: t.k, d: t.d }); postPop('monitors', { type: 'tally', d: t.d });
   document.querySelectorAll('#app .tly').forEach(b => tallyFill(b, t.d));
@@ -1701,6 +1822,7 @@ window.addEventListener('message', e => {
   if (!ready) return;
   if (m.cfg !== cfgKey()) pushConfig();
   if (m.tk !== tallyPack().k) pushTally(true);
+  if (m.pk !== photoKey) pushPhotos(true);
   if (m.key !== showKey()) pushShow();
   if (m.av !== videoLevel()) postOut({ type: 'audio', vol: videoLevel() });
 });
@@ -1739,7 +1861,7 @@ function pushMon() {
   const tk = !run.hold && cur && cur.trans ? cur.trans : state.trans || 'fade';
   postPop('monitors', { type: 'mon', v: p.v, event: state.eventName, card: run.hold ? 'hold' : cur ? 'air' : 'idle', hold: run.hold, ms: tk === 'cut' ? 0 : state.fadeMs || 400,
     airLab: $('airLab').textContent, airTtl: $('airTtl').textContent, airSub: $('airSub').textContent, nxtTtl: $('nxtTtl').textContent, nxtSub: $('nxtSub').textContent,
-    tally: tallyPack().d, pgm: pack(ok(airA), { org: airOrg(airA), loop: run.hold ? true : airA ? airA.loop : undefined }), pvw: pack(ok(nxtA), { org: tallyOrg(nxtA, nxt) }), sources: assets.filter(a => a.kind !== 'audio').map(a => pack(a, { pgm: a === airA, pvw: a === nxtA })) });
+    tally: tallyPack().d, pgm: pack(ok(airA), { org: airOrg(airA), loop: run.hold ? true : airA ? airA.loop : undefined }), pvw: pack(ok(nxtA), { org: tallyOrg(nxtA, nxt) }), sources: assets.filter(a => a.kind !== 'audio' && notPhoto(a)).map(a => pack(a, { pgm: a === airA, pvw: a === nxtA })) });
 }
 function pushSnd() {
   const p = pops.sound; if (!p.win || p.win.closed) return;
@@ -1754,7 +1876,7 @@ window.addEventListener('message', e => {
   const m = e.data; if (!m || m.nl !== 1) return;
   if (m.type === 'pop' && pops[m.kind]) {
     const p = pops[m.kind]; p.win = e.source; p.last = Date.now();
-    if (m.v !== p.v) { if (m.kind === 'monitors') pushMon(); else pushSnd(); }
+    if (m.v !== p.v) { if (m.kind === 'monitors') { pushMon(); postPop('monitors', { type: 'photos', list: albumList().map(a => ({ id: a.id, blob: a.blob })) }); } else pushSnd(); }
     popUi();
   } else if (m.type === 'cmd') {
     if (m.cmd === 'take') { if (state && !document.querySelector('dialog[open]')) takeNext(); }
@@ -1797,7 +1919,7 @@ function contentCell(it) {
   return '<div class="cont">' + thumb(null, 'sm') + '<span class="nm none">Black</span></div>';
 }
 function options(sel) {
-  return '<option value="">None (black)</option>' + assets.filter(a => a.kind !== 'audio').map(a =>
+  return '<option value="">None (black)</option>' + assets.filter(a => a.kind !== 'audio' && notPhoto(a)).map(a =>
     '<option value="' + a.id + '"' + (a.id === sel ? ' selected' : '') + '>' + esc(a.name) + '</option>').join('');
 }
 function musicOptions(sel) {
@@ -1986,7 +2108,8 @@ function render() {
   $('btnAdd').style.display = $('btnUndo').style.display = edit ? '' : 'none'; $('btnUndo').disabled = !hist.length;
   VIEWS.forEach(k => { $('nav' + k[0].toUpperCase() + k.slice(1)).setAttribute('aria-pressed', view === k); document.body.classList.toggle('v-' + k, view === k); });
   $('viewTitle').textContent = { run: 'Rundown', lib: 'Content', gst: 'Guests', plg: 'Pledges', set: 'Settings' }[view];
-  $('tabLib').textContent = 'Content (' + assets.length + ')';
+  $('tabLib').textContent = 'Content (' + assets.filter(notPhoto).length + ')';
+  { const nw = assets.filter(a => isPhoto(a) && photoSt(a) === 'new').length; $('phPill').style.display = nw ? '' : 'none'; $('phPillTxt').textContent = nw + ' new photo' + (nw === 1 ? '' : 's'); }
   $('ruleSum').textContent = ruleSummary();
   $('drop').style.display = state.rules ? '' : 'none'; $('locked').style.display = state.rules ? 'none' : '';
   $('viewRun').style.display = view === 'run' ? '' : 'none'; $('viewLib').style.display = view === 'lib' ? '' : 'none'; $('viewSet').style.display = view === 'set' ? '' : 'none';
@@ -2109,10 +2232,46 @@ addEventListener('scroll', () => { if (!stripRaf) stripRaf = requestAnimationFra
 addEventListener('resize', () => stripSync());
 $('backAir').onclick = () => follow(true);
 $('lsTake').onclick = () => takeNext(); $('lsHold').onclick = () => toggleHold();
+function renderAlbum() {
+  const ph = assets.filter(isPhoto).sort((x, y) => (y.at || 0) - (x.at || 0)), by = { new: [], ok: [], skip: [] }; ph.forEach(a => by[photoSt(a)].push(a));
+  const tile = (a, acts) => '<div class="al-ph" data-id="' + a.id + '">' + (a.blob ? '<img src="' + objUrl(a) + '" alt="" loading="lazy">' : '<span class="wait">Downloading</span>') +
+    (/^Photo from /.test(a.name) ? '<span class="al-by">' + esc(a.name.slice(6)) + '</span>' : '') + '<div class="al-act">' + acts + '</div></div>';
+  $('alSum').textContent = ph.length ? by.ok.length + ' on the loop' + (by.new.length ? ' · ' + by.new.length + ' to check' : '') + (by.skip.length ? ' · ' + by.skip.length + ' skipped' : '') : 'No photos yet. Photos you approve play on the photo loop, for the end of the night.';
+  $('alCap').checked = !!state.albumCap;
+  $('alNewWrap').style.display = by.new.length ? '' : 'none';
+  $('alNew').innerHTML = by.new.map(a => tile(a, '<button class="ok" data-ph="ok">Approve</button><button data-ph="skip">Skip</button>')).join('');
+  $('alOkWrap').style.display = by.ok.length ? '' : 'none';
+  $('alOk').innerHTML = by.ok.map(a => tile(a, '<button data-ph="skip" title="Take off the loop">✕</button>')).join('');
+  $('alSkipWrap').style.display = by.skip.length ? '' : 'none'; $('alSkipSum').textContent = 'Skipped (' + by.skip.length + ')';
+  $('alSkip').innerHTML = by.skip.map(a => tile(a, '<button data-ph="ok" title="Put on the loop">Approve</button>')).join('');
+}
+function setPhoto(ids, st) { if (!state) return; state.album = Object.assign({}, state.album || {}); ids.forEach(id => { state.album[id] = st; }); save(); render(); }
+async function addPhotos(files) {
+  if (!state) return; const target = state, bad = []; let n = 0;
+  for (const f of Array.from(files)) {
+    if (!/^image\//.test(f.type)) { bad.push(f.name + ' is not a photo.'); continue; }
+    let r; try { r = await shrinkPhoto(f); } catch (e) { bad.push(f.name + ' could not be opened. HEIC photos from an iPhone need converting to JPEG first, or send them from the phone with Neon Loop remote.'); continue; }
+    if (state !== target) return;
+    addAsset({ id: newId(), name: f.name.replace(/\.[^.]+$/, '') || 'Photo', kind: 'image', album: true, at: f.lastModified || Date.now(), blob: r.blob, w: r.w, h: r.h, loop: true, sound: false, rev: 0 }); n++;
+  }
+  if (n) toast(n + ' photo' + (n === 1 ? '' : 's') + ' added. Approve them to put them on the loop.');
+  showRejects(bad); render();
+}
+$('alAdd').onclick = () => $('alFile').click();
+$('alFile').onchange = e => { addPhotos(e.target.files); e.target.value = ''; };
+$('alCap').onchange = e => { state.albumCap = e.target.checked; save(); render(); };
+$('alAll').onclick = () => setPhoto(assets.filter(a => isPhoto(a) && photoSt(a) === 'new').map(a => a.id), 'ok');
+$('album').addEventListener('click', e => { const b = e.target.closest('[data-ph]'), t = e.target.closest('.al-ph'); if (b && t) setPhoto([t.dataset.id], b.dataset.ph); });
+['dragenter', 'dragover'].forEach(n => $('album').addEventListener(n, e => { e.preventDefault(); e.stopPropagation(); $('album').classList.add('over'); }));
+['dragleave', 'drop'].forEach(n => $('album').addEventListener(n, e => { e.preventDefault(); e.stopPropagation(); $('album').classList.remove('over'); }));
+$('album').addEventListener('drop', e => addPhotos(e.dataTransfer.files));
+$('phPill').onclick = () => { setEdit(false); view = 'lib'; render(); setTimeout(() => $('album').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); };
 function renderLib() {
-  if (!assets.length && !state.rules) { $('lib').innerHTML = ''; return; }
-  if (!assets.length) { $('lib').innerHTML = '<div class="empty" style="grid-column:1/-1">No content yet. Add a graphic, a video, or a web page such as the pledge dashboard.</div>'; return; }
-  $('lib').innerHTML = assets.map(a => {
+  renderAlbum();
+  const lib = assets.filter(notPhoto);
+  if (!lib.length && !state.rules) { $('lib').innerHTML = ''; return; }
+  if (!lib.length) { $('lib').innerHTML = '<div class="empty" style="grid-column:1/-1">No content yet. Add a graphic, a video, or a web page such as the pledge dashboard.</div>'; return; }
+  $('lib').innerHTML = lib.map(a => {
     const aud = a.kind === 'audio', used = state.items.filter(i => (aud ? i.music : i.asset) === a.id).length, isHold = (aud ? state.holdingMusic : state.holdingAsset) === a.id;
     const kind = isTally(a) ? 'Live graphic' : a.kind === 'web' ? 'Web page' : aud ? 'Audio' + (a.secs ? ' · ' + fmt(a.secs) : '') : a.kind === 'video' ? 'Video' + (a.secs > 0 ? ' · ' + fmt(Math.ceil(a.secs)) : '') + (a.loop === false ? ', plays once' : ', loops') : 'Image';
     return '<div class="asset' + (isHold ? ' holding' : '') + '" data-id="' + a.id + '">' +
@@ -2233,7 +2392,7 @@ function openPicker(i, mode) {
 function renderPicker() {
   const it = state.items[pickRow]; if (!it) return;
   const q = $('pkFind').value.trim().toLowerCase(), cur = (pickMusic ? it.music : it.asset) || '';
-  const list = assets.filter(a => (a.kind === 'audio') === pickMusic && (!q || a.name.toLowerCase().indexOf(q) !== -1));
+  const list = assets.filter(a => (a.kind === 'audio') === pickMusic && notPhoto(a) && (!q || a.name.toLowerCase().indexOf(q) !== -1));
   const tile = (id, name, a, note) => '<button type="button" class="pk' + (cur === id ? ' sel' : '') + '" data-id="' + id + '" data-name="' + esc(name) + '">' + thumb(a, 'lg') +
     '<span class="nm">' + esc(name) + '</span><small>' + note + '</small></button>';
   $('pkGrid').innerHTML = (q ? '' : pickMusic ? tile('', 'None (silence)', null, 'No music') : tile('', 'None (black)', null, 'Nothing on screen')) +
@@ -2273,7 +2432,7 @@ function addLinkFromPicker() {
 $('pkLive').addEventListener('click', e => {         // one tally and one night total per event; picking again reuses it
   const t = e.target.dataset.t; if (!t) return;
   const url = 'neonloop://tally/' + t; let a = assets.find(x => x.kind === 'web' && x.url === url);
-  if (!a) { a = { id: newId(), name: t === 'follow' ? 'Live pledge tally' : t === 'thanks' ? 'Thank-you wall' : t === 'break' ? 'Break countdown' : 'Night total', kind: 'web', url: url, rev: 0 }; addAsset(a); }
+  if (!a) { a = { id: newId(), name: t === 'follow' ? 'Live pledge tally' : t === 'thanks' ? 'Thank-you wall' : t === 'break' ? 'Break countdown' : t === 'photos' ? 'Photo loop' : 'Night total', kind: 'web', url: url, rev: 0 }; addAsset(a); }
   chooseContent(a.id);
 });
 $('pkAdd').onclick = addLinkFromPicker;
@@ -2429,7 +2588,7 @@ function toBlob(d) {
 $('btnExport').onclick = async () => {
   try {
     const out = [];
-    for (const a of assets) out.push({ id: a.id, name: a.name, kind: a.kind, url: a.url, w: a.w, h: a.h, secs: a.secs, fade: a.fade, design: a.design, loop: a.loop, sound: a.sound, data: a.blob ? await toData(a.blob) : undefined });
+    for (const a of assets) out.push({ album: a.album || undefined, at: a.at, id: a.id, name: a.name, kind: a.kind, url: a.url, w: a.w, h: a.h, secs: a.secs, fade: a.fade, design: a.design, loop: a.loop, sound: a.sound, data: a.blob ? await toData(a.blob) : undefined });
     const blob = new Blob([JSON.stringify({ neonLoop: 3, eventName: state.eventName, type: state.type, date: state.date, rules: state.rules,
       holdingAsset: state.holdingAsset, fadeMs: state.fadeMs, showStart: state.showStart || '', showEnd: state.showEnd || '', holdingMusic: state.holdingMusic || '', trans: state.trans || '', items: state.items, guests: state.guests || [], pledges: state.pledges || [], orgs: state.orgs || [], fund: state.fund || null, assets: out })], { type: 'application/json' });
     const el = document.createElement('a'); el.href = URL.createObjectURL(blob);
@@ -2446,7 +2605,7 @@ $('file').onchange = e => {                          // an export file comes in 
       const d = JSON.parse(r.result); if (!Array.isArray(d.items)) throw new Error('No items');
       const ev = newEvent(String(d.eventName || 'Imported event'), String(d.type || 'Other'), String(d.date || ''), d.rules ? Object.assign(clone(DEFAULT.rules), d.rules) : null), map = {};
       (d.assets || []).forEach(x => {
-        const a = { id: newId(), eventId: ev.id, name: String(x.name || ''), kind: x.kind, url: x.url, w: x.w, h: x.h, secs: x.secs, fade: x.fade, design: x.design && x.design.layers ? x.design : undefined, loop: x.loop !== false, sound: !!x.sound, rev: 0 };
+        const a = { album: !!x.album || undefined, at: +x.at || 0, id: newId(), eventId: ev.id, name: String(x.name || ''), kind: x.kind, url: x.url, w: x.w, h: x.h, secs: x.secs, fade: x.fade, design: x.design && x.design.layers ? x.design : undefined, loop: x.loop !== false, sound: !!x.sound, rev: 0 };
         if (x.data) a.blob = toBlob(x.data);
         if (a.kind !== 'web' && !a.blob) return;
         map[x.id] = a.id; allAssets.push(a); putAsset(a);
@@ -2615,7 +2774,7 @@ const cloud = { cfg: lsGet('neonloop.cloud'), ses: lsGet('neonloop.session'), pr
 function signedIn() { return !!(cloud.cfg && cloud.ses); }
 function isProducer() { return signedIn() && !!cloud.profile && cloud.profile.role === 'producer'; }
 function tomb(t) { (book.tomb = book.tomb || []).push(t); }
-function sigOf(ev) { return JSON.stringify([ev.eventName, ev.type, ev.date || '', ev.rules || null, ev.items, ev.holdingAsset || '', ev.fadeMs, (ev.showStart || '') + (ev.showEnd ? '>' + ev.showEnd : ''), ev.holdingMusic || '', ev.trans || '']); }
+function sigOf(ev) { return JSON.stringify([ev.eventName, ev.type, ev.date || '', ev.rules || null, ev.items, ev.holdingAsset || '', ev.fadeMs, (ev.showStart || '') + (ev.showEnd ? '>' + ev.showEnd : ''), ev.holdingMusic || '', ev.trans || '', ev.album || {}, !!ev.albumCap]); }
 
 /* ----- talking to Supabase with plain fetch (no library, so the file still opens offline) ----- */
 function setSession(r) {
@@ -2687,13 +2846,13 @@ function keyRole(k) {                                // spot the secret key befo
 
 /* ----- rows <-> local objects ----- */
 function evToRow(ev) {
-  return { id: ev.id, name: ev.eventName, type: ev.type || 'Other', event_date: ev.date || null, rules: ev.rules || null, rundown: { start: ev.showStart || '', end: ev.showEnd || '', holdMusic: ev.holdingMusic || '', trans: ev.trans || '', items: ev.items },
+  return { id: ev.id, name: ev.eventName, type: ev.type || 'Other', event_date: ev.date || null, rules: ev.rules || null, rundown: { start: ev.showStart || '', end: ev.showEnd || '', holdMusic: ev.holdingMusic || '', trans: ev.trans || '', items: ev.items, album: ev.album || {}, albumCap: !!ev.albumCap },
     holding_asset: isUuid(ev.holdingAsset) ? ev.holdingAsset : null, fade_ms: ev.fadeMs == null ? 400 : ev.fadeMs, updated_at: new Date().toISOString() };
 }
 function applyRow(ev, r) {
   ev.eventName = r.name; ev.type = r.type; ev.date = r.event_date || ''; ev.rules = r.rules || null;
   const rd = r.rundown || [];
-  ev.items = Array.isArray(rd) ? rd : Array.isArray(rd.items) ? rd.items : []; ev.showStart = Array.isArray(rd) ? '' : rd.start || ''; ev.showEnd = Array.isArray(rd) ? '' : rd.end || ''; ev.holdingMusic = Array.isArray(rd) ? '' : rd.holdMusic || ''; if (!Array.isArray(rd) && rd.trans) ev.trans = rd.trans; ev.holdingAsset = r.holding_asset || ''; ev.fadeMs = r.fade_ms == null ? 400 : r.fade_ms;
+  ev.items = Array.isArray(rd) ? rd : Array.isArray(rd.items) ? rd.items : []; ev.showStart = Array.isArray(rd) ? '' : rd.start || ''; ev.showEnd = Array.isArray(rd) ? '' : rd.end || ''; ev.holdingMusic = Array.isArray(rd) ? '' : rd.holdMusic || ''; if (!Array.isArray(rd) && rd.trans) ev.trans = rd.trans; ev.album = (!Array.isArray(rd) && rd.album) || {}; ev.albumCap = !Array.isArray(rd) && !!rd.albumCap; ev.holdingAsset = r.holding_asset || ''; ev.fadeMs = r.fade_ms == null ? 400 : r.fade_ms;
   ev.syncedSig = sigOf(ev); ev.cloudUpdated = r.updated_at;
 }
 function extOf(a) {
@@ -2706,7 +2865,7 @@ function assetRow(a) {
 }
 function applyAsset(a, r) {
   a.name = r.name; a.kind = r.kind; a.url = r.url || undefined; a.w = r.width || undefined; a.h = r.height || undefined;
-  a.loop = r.loop; a.sound = r.sound; if (r.fade_s != null) a.fade = +r.fade_s; a.path = r.storage_path || undefined; a.mime = r.mime || ''; a.bytes = r.bytes || 0; if (r.design !== undefined) a.design = r.design || undefined;
+  a.loop = r.loop; a.sound = r.sound; if (r.fade_s != null) a.fade = +r.fade_s; a.path = r.storage_path || undefined; a.mime = r.mime || ''; a.bytes = r.bytes || 0; a.at = Date.parse(r.created_at || '') || a.at || Date.now(); if (isPhoto(a)) a.album = true; if (r.design !== undefined) a.design = r.design || undefined;
 }
 function removeLocalAsset(a) { allAssets = allAssets.filter(x => x !== a); delAsset(a.id); const u = thumbUrl.get(a.id); if (u) { URL.revokeObjectURL(u); thumbUrl.delete(a.id); } }
 function removeLocalEvent(ev) {
@@ -2785,7 +2944,7 @@ async function pushAssets() {
       if (a.pending === 'upload') {
         if (a.kind !== 'web') {
           if (!a.blob) continue;
-          a.path = a.path || ev.id + '/' + a.id + '.' + extOf(a);
+          a.path = a.path || ev.id + (a.album ? '/photos/' : '/') + a.id + '.' + extOf(a);
           await api('POST', '/storage/v1/object/content/' + a.path, a.blob, { 'Content-Type': a.blob.type || 'application/octet-stream', 'x-upsert': 'true' });
         }
         const row = assetRow(a), up = { Prefer: 'return=representation,resolution=merge-duplicates' };
@@ -3791,6 +3950,7 @@ function hostMsg(m) {
   if (m.t === 'hello') { liveSend(hostSnap(!!m.guests)); return; }
   if (m.id && rmDone.indexOf(m.id) !== -1) { hostReply(m, true, 'Already done'); return; }    // a message sent twice is acted on once
   if (m.id) { rmDone.push(m.id); if (rmDone.length > 400) rmDone.shift(); }
+  if (m.t === 'photo') { lastPull = 0; sync(true); return; }
   if (m.t === 'cmd') {
     if (!rmCfg().show) return hostReply(m, false, 'Show control from remotes is switched off on the show laptop.');
     if (m.cmd === 'next') { if (run.cued >= state.items.length) return hostReply(m, false, 'That is the end of the rundown.'); takeNext(); }
@@ -3888,8 +4048,8 @@ function remoteRender() {
     return;
   }
   rmTick();
-  $('rvTabShow').setAttribute('aria-pressed', rm.tab === 'show'); $('rvTabPlg').setAttribute('aria-pressed', rm.tab === 'pledge');
-  show('rvShow', rm.tab === 'show'); show('rvPlg', rm.tab === 'pledge');
+  $('rvTabShow').setAttribute('aria-pressed', rm.tab === 'show'); $('rvTabPlg').setAttribute('aria-pressed', rm.tab === 'pledge'); $('rvTabPh').setAttribute('aria-pressed', rm.tab === 'photos');
+  show('rvShow', rm.tab === 'show'); show('rvPlg', rm.tab === 'pledge'); show('rvPh', rm.tab === 'photos'); rmPhRender();
   const sn = rm.snap;
   if (live.status === 'denied') { $('rvShowNote').textContent = liveWhy(); }
   if (!sn) {
@@ -3968,6 +4128,44 @@ $('rvSwitch').onclick = () => { liveClose(); rm.ev = null; lsSet('neonloop.remot
 $('rvEvList').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.id === 'rvRetry') { rm.evErr = ''; rmLoadEvents(); return; } rmPick({ id: b.dataset.id, name: b.dataset.name }); });
 $('rvTabShow').onclick = () => { rm.tab = 'show'; remoteRender(); };
 $('rvTabPlg').onclick = () => { rm.tab = 'pledge'; remoteRender(); };
+$('rvTabPh').onclick = () => { rm.tab = 'photos'; remoteRender(); };
+/* photos from the phone: made smaller here, put straight into the event's cloud storage, then the show laptop is told to fetch them */
+const rmPh = { q: [], done: [], busy: false, err: '' };
+function rmPhRender() {
+  if (!REMOTE) return;
+  $('rvPhMsg').textContent = rmPh.err || (rmPh.q.length ? 'Sending ' + rmPh.q.length + ' photo' + (rmPh.q.length === 1 ? '' : 's') + '…' : rmPh.done.length ? 'All sent. Check them on the show laptop, under Content.' : '');
+  $('rvPhMsg').className = 'rv-msg' + (!rmPh.err && !rmPh.q.length && rmPh.done.length ? ' ok' : '');
+  $('rvPhList').innerHTML = !rmPh.q.length && !rmPh.done.length ? '<p class="rv-note">Nothing sent yet.</p>' :
+    rmPh.q.map(x => '<span class="wait"><img src="' + x.u + '" alt=""><i>Waiting</i></span>').concat(rmPh.done.slice(-24).reverse().map(x => '<span><img src="' + x.u + '" alt=""></span>')).join('');
+}
+async function rmPhotos(files) {
+  for (const f of Array.from(files)) {
+    if (!/^image\//.test(f.type)) continue;
+    try { const r = await shrinkPhoto(f); rmPh.q.push({ id: uuid(), ev: rm.ev.id, blob: r.blob, w: r.w, h: r.h, u: URL.createObjectURL(r.blob) }); }
+    catch (e) { rmPh.err = f.name + ' could not be opened on this device.'; }
+  }
+  rmPhRender(); rmPhSend();
+}
+async function rmPhSend() {
+  if (rmPh.busy || !rmPh.q.length || !signedIn()) return; rmPh.busy = true;
+  while (rmPh.q.length) {
+    const x = rmPh.q[0], path = x.ev + '/photos/' + x.id + '.jpg';
+    try {
+      await api('POST', '/storage/v1/object/content/' + path, x.blob, { 'Content-Type': 'image/jpeg', 'x-upsert': 'true' });
+      await api('POST', '/rest/v1/assets', { id: x.id, event_id: x.ev, name: 'Photo from ' + rmName(), kind: 'image', storage_path: path, mime: 'image/jpeg', bytes: x.blob.size, width: x.w, height: x.h, loop: true, sound: false },
+        { Prefer: 'return=representation,resolution=merge-duplicates' });
+      rmPh.q.shift(); rmPh.done.push(x); rmPh.err = ''; rmSend({ t: 'photo', id: x.id });
+    } catch (e) {
+      rmPh.err = e.network || !e.status ? 'No connection. The photos will send when the internet is back.' : 'The cloud did not accept the photo (' + e.message + '). Check the event has its content rules set.';
+      break;
+    }
+    rmPhRender();
+  }
+  rmPh.busy = false; rmPhRender();
+}
+setInterval(() => { if (REMOTE && rmPh.q.length) rmPhSend(); }, 15000);
+$('rvPhGo').onclick = () => $('rvPhFile').click();
+$('rvPhFile').onchange = e => { rmPhotos(e.target.files); e.target.value = ''; };
 $('rvTake').onclick = () => rmCmd('next');
 $('rvHold').onclick = () => rmCmd('hold', { on: !(rm.snap && rm.snap.run.hold) });
 $('rvRows').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b) return; if (confirm('Take "' + b.querySelector('.t').textContent + '" now?')) rmCmd('take', { k: b.dataset.k }); });
@@ -4014,13 +4212,15 @@ async function readyCheck() {
   note(state.holdingAsset, 'holding'); note(state.holdingMusic, 'holding music');
   const where = id => (uses.get(id) || []).join(', ');
   uses.forEach((w, id) => { if (!byId(id)) add('bad', 'Missing content', 'Used by ' + w.join(', ') + ', but it has been deleted. Choose other content for ' + (w.length > 1 ? 'those rows' : 'that row') + '.'); });
-  let files = 0, bytes = 0;
+  let files = 0, bytes = 0, phOn = 0, phWait = 0;
   assets.forEach(a => {
     if (isTally(a) || a.kind === 'app') return;                         // live graphics are drawn by Neon Loop itself
+    if (isPhoto(a)) { if (photoSt(a) !== 'skip') { if (a.blob) phOn++; else phWait++; } return; }
     if (a.kind === 'web') { if (uses.has(a.id)) add('warn', a.name, (IMG_URL.test(a.url) ? 'Linked picture' : 'Web page') + ' (' + where(a.id) + '). Needs internet on the night: plan a fallback, or run it as its own switcher input.'); return; }
     if (a.blob && a.blob.size > 0 && !a.stale) { files++; bytes += a.blob.size; return; }
     add('bad', a.name, (a.dlFailed ? a.error || 'Download failed.' : a.path ? 'Not downloaded to this laptop yet.' : 'The file is missing on this laptop.') + (uses.has(a.id) ? ' Used by ' + where(a.id) + '.' : ''));
   });
+  if (phOn || phWait) add(phWait ? 'warn' : 'ok', 'Event photos', phOn + ' photo' + (phOn === 1 ? '' : 's') + ' on this laptop' + (phWait ? ', ' + phWait + ' still to download. They join the photo loop once they arrive.' : '.'));
   add(files ? 'ok' : 'warn', 'Content', files ? files + ' file' + (files === 1 ? '' : 's') + ' on this laptop (' + mb(bytes) + ').' : 'No content files in this event yet.');
   return out;
 }
