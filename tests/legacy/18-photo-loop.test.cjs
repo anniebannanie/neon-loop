@@ -11,17 +11,20 @@ const URL0 = 'file://' + path.resolve(__dirname, '../../public/legacy/index.html
   const [A, ctxA] = await open(1440, 900);
   await signin(A, '#btnCloud');
   await A.click('#btnNew'); await A.fill('#evNameIn', 'Gala Night'); await A.click('#evSave');
-  await A.waitForFunction(() => document.getElementById('cloudTxt2').textContent === 'Cloud: all saved', null, { timeout: 10000 }); await A.click('#navLib');
-  ck('Content has an Event photos panel', await A.isVisible('#album') && (await A.textContent('#alSum')).startsWith('No photos yet'));
+  await A.waitForFunction(() => document.getElementById('cloudTxt2').textContent === 'Cloud: all saved', null, { timeout: 10000 });
+  ck('the side menu has Photos', await A.isVisible('#navPho') && (await A.textContent('#tabPho')) === 'Photos');
+  await A.click('#navPho');
+  ck('the Photos page has the Event photos panel', await A.isVisible('#album') && (await A.textContent('#alSum')).startsWith('No photos yet'));
   await A.setInputFiles('#alFile', [M('Crowd.jpg'), M('Team.jpg')]);
   await A.waitForFunction(() => document.querySelectorAll('#alNew .al-ph').length === 2, null, { timeout: 10000 });
   ck('photos from a camera land in To check', (await A.textContent('#alSum')).includes('0 on the loop · 2 to check'));
   await A.waitForFunction(() => [...document.querySelectorAll('#alNew img')].every(i => i.naturalWidth > 0), null, { timeout: 5000 }).catch(() => {});
   ck('they are made smaller (long side 2560) and kept out of the show content', await A.evaluate(() => [...document.querySelectorAll('#alNew img')].every(i => Math.max(i.naturalWidth, i.naturalHeight) === 2560)) && (await A.textContent('#tabLib')) === 'Content (0)' && (await A.locator('#lib .asset').count()) === 0);
-  ck('the header flags new photos to check', await A.isVisible('#phPill') && (await A.textContent('#phPillTxt')) === '2 new photos');
+  ck('the Photos button counts photos to check', (await A.textContent('#phBadge')) === '2');
+  await A.click('#navRun'); ck('away from Photos, the header flags them too', await A.isVisible('#phPill') && (await A.textContent('#phPillTxt')) === '2 new photos'); await A.click('#navPho');
   await A.locator('#alNew .al-ph').nth(0).locator('[data-ph=ok]').click();
   await A.locator('#alNew .al-ph').nth(0).locator('[data-ph=skip]').click();
-  ck('approve and skip', (await A.textContent('#alSum')) === '1 on the loop · 1 skipped' && !(await A.isVisible('#phPill')) && (await A.locator('#alOk .al-ph').count()) === 1);
+  ck('approve and skip', (await A.textContent('#alSum')) === '1 on the loop · 1 skipped' && !(await A.isVisible('#phPill')) && !(await A.isVisible('#phBadge')) && (await A.locator('#alOk .al-ph').count()) === 1);
   await A.click('#alSkipWrap summary'); await A.locator('#alSkip [data-ph=ok]').click();
   ck('a skipped photo can go back on the loop', (await A.textContent('#alSum')) === '2 on the loop');
   // the loop on a row
@@ -42,7 +45,7 @@ const URL0 = 'file://' + path.resolve(__dirname, '../../public/legacy/index.html
   await O.waitForFunction(f => { const i = document.querySelector('.tly .ph-f.on:last-child img'); return i && i.naturalWidth > 0 && i.naturalWidth + 'x' + i.naturalHeight !== f; }, first, { timeout: 9000 }).catch(() => {});
   ck('then it moves on to the next photo', (await O.evaluate(() => { const i = document.querySelector('.tly .ph-f.on:last-child img'); return i.naturalWidth + 'x' + i.naturalHeight; })) === '2560x1920');
   ck('no caption until it is switched on', !(await O.isVisible('.ph-cap')));
-  await A.click('#navLib'); await A.check('#alCap'); await A.click('#navRun');
+  await A.click('#navPho'); await A.check('#alCap'); await A.click('#navRun');
   await O.waitForSelector('.ph-cap', { state: 'visible', timeout: 5000 }).catch(() => {});
   ck('thank-you caption with the event name', (await O.textContent('.ph-cap')).startsWith('Thank youGala Night'));
   await O.screenshot({ path: path.join(__dirname, 'out/photo-loop.png') });
@@ -59,7 +62,7 @@ const URL0 = 'file://' + path.resolve(__dirname, '../../public/legacy/index.html
   ck('the laptop fetches it straight away and asks for a check', (await A.textContent('#phPillTxt')) === '1 new photo');
   ck('it does not go on screen before it is approved', (await O.evaluate(() => document.querySelectorAll('.tly .ph-f').length)) <= 2 && !(await O.evaluate(() => [...document.querySelectorAll('.tly .ph-f img')].some(i => i.naturalWidth === 2560 && i.naturalHeight === 1920 && i.closest('.ph-f').classList.contains('k9')))));
   await A.click('#phPill'); await A.waitForTimeout(400);
-  ck('the pill opens the photos to check, showing who sent it', await A.isVisible('#alNew') && (await A.textContent('#alNew .al-by')) === 'from Trevor');
+  ck('the pill opens the Photos page, showing who sent it', (await A.getAttribute('#navPho', 'aria-pressed')) === 'true' && await A.isVisible('#alNew') && (await A.textContent('#alNew .al-by')) === 'from Trevor');
   await A.locator('#alNew [data-ph=ok]').click();
   await O.waitForFunction(() => { const fs = [...document.querySelectorAll('.tly .ph-f.on img')]; return fs.some(i => i.src && i.naturalWidth === 2560); }, null, { timeout: 9000 }).catch(() => {});
   ck('once approved, the new photo jumps the queue onto the loop', (await A.textContent('#alSum')) === '3 on the loop');
@@ -70,7 +73,9 @@ const URL0 = 'file://' + path.resolve(__dirname, '../../public/legacy/index.html
   ck('offline check counts the photos', (await A.textContent('#rdList')).includes('Event photos3 photos on this laptop'));
   await A.click('#rdClose');
   await R.screenshot({ path: path.join(__dirname, 'out/photo-remote.png') });
-  await A.click('#navLib'); await A.locator('#album').screenshot({ path: path.join(__dirname, 'out/photo-album.png') });
+  await A.click('#navPho'); await A.screenshot({ path: path.join(__dirname, 'out/photo-page.png') }); await A.locator('#album').screenshot({ path: path.join(__dirname, 'out/photo-album.png') });
+  await A.setViewportSize({ width: 390, height: 800 }); await A.waitForTimeout(300);
+  ck('phone: the bottom menu still reaches Photos', await A.evaluate(() => { const r = document.querySelector('.rail'), b = document.getElementById('navPho'); b.scrollIntoView({ inline: 'nearest' }); const rr = r.getBoundingClientRect(), bb = b.getBoundingClientRect(); return rr.right <= 390 && bb.left >= rr.left - 1 && bb.right <= rr.right + 1 && document.documentElement.scrollWidth <= 392; }));
   errs.forEach(x => res.push('ERR ' + x)); ck('no page errors', !errs.length);
   console.log(res.join('\n')); await b.close(); process.exit(0);
 })().catch(e => { console.error('CRASH', e); process.exit(1); });

@@ -47,5 +47,5 @@ export const supabase: SupabaseClient | null = configError ? null
   : createClient(url!, key!, { auth: { persistSession: true, autoRefreshToken: true, storageKey: SESSION_KEY, storage: sharedStorage } });
 
 /** Where the live show screens open a given event and section. */
-const VIEW: Record<string, string> = { rundown: 'run', content: 'lib', guests: 'gst', pledges: 'plg', settings: 'set' };
+const VIEW: Record<string, string> = { rundown: 'run', content: 'lib', photos: 'pho', guests: 'gst', pledges: 'plg', settings: 'set' };
 export const liveShowUrl = (eventId?: string, section?: string) => '/legacy/' + (eventId ? '?event=' + encodeURIComponent(eventId) + '&view=' + (VIEW[section || 'rundown'] || 'run') : '');
