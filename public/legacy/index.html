@@ -712,6 +712,17 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
 .rv-note{color:var(--muted);font-size:13px;margin:6px 0 0}
 #rmPill.ok i{background:#3ddc97} #rmPill.warn i{background:var(--warn)}
 .prow .chip.via{background:#22d3ff22;color:#8fe6ff}
+
+/* ready for offline */
+#readyDlg{width:min(600px,94vw)}
+.rd-sum{font-size:17px;font-weight:600;margin:4px 0 12px;display:flex;gap:10px;align-items:center}
+.rd-sum i{width:12px;height:12px;border-radius:50%;flex:none;background:var(--muted)}
+.rd-sum.ok i{background:#3ddc97;box-shadow:0 0 10px #3ddc9799} .rd-sum.warn i{background:var(--warn)} .rd-sum.bad i{background:#ff3d63}
+.rd-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto}
+.rd-list li{display:grid;grid-template-columns:22px 1fr;gap:4px 10px;padding:10px 12px;border-radius:12px;background:#ffffff08;border:1px solid #ffffff10}
+.rd-list li b{font-weight:600} .rd-list li span{grid-column:2;color:var(--muted);font-size:13px;line-height:1.5}
+.rd-list li::before{grid-row:1/3;font-weight:700;text-align:center}
+.rd-list li.ok::before{content:"✓";color:#3ddc97} .rd-list li.warn::before{content:"!";color:var(--warn)} .rd-list li.bad::before{content:"✕";color:#ff3d63}
 </style>
 </head>
 <body>
@@ -824,6 +835,7 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
   <div class="tabs">
     <h2 class="vh" id="viewTitle">Rundown</h2>
     <span class="runtools" id="runTools">
+      <button id="btnReady" class="tool" title="Check this laptop can run the show without internet">Offline check</button>
       <button id="btnAdd" class="tool">+ Add segment</button>
       <button id="btnUndo" class="tool" title="Step back one change">Undo</button>
       <button id="btnEdit" class="tool">Edit rundown</button>
@@ -928,6 +940,11 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
         <p class="hint" id="rmHow" style="margin:0"></p>
       </section>
       <section class="setcard">
+        <h3>Ready for offline</h3>
+        <p>Checks this laptop can run the event with no internet: the app, the rundown and every piece of content.</p>
+        <button id="btnReady2">Run the offline check</button>
+      </section>
+      <section class="setcard">
         <h3>Restart the rundown</h3>
         <p>Goes back to the top of the rundown and sends the screen to black.</p>
         <button id="btnReset">Restart rundown</button>
@@ -1021,6 +1038,12 @@ body.remote #remoteView{display:block;max-width:760px;margin:0 auto;padding:14px
   <span class="hint">Anonymous pledges never show a name.</span>
   <div id="psErr" class="err"></div>
   <div class="row"><button type="button" id="psCancel">Cancel</button><button type="button" id="psSave" class="primary">Save</button></div>
+</dialog>
+<dialog id="readyDlg">
+  <h2>Ready for offline</h2>
+  <p id="rdSum" class="rd-sum"></p>
+  <ul id="rdList" class="rd-list"></ul>
+  <div class="row" style="flex-wrap:wrap"><button type="button" id="rdFix" style="display:none">Download missing content</button><span style="flex:1"></span><button type="button" id="rdAgain">Check again</button><button type="button" id="rdClose" class="primary">Close</button></div>
 </dialog>
 <dialog id="pickDlg">
   <div class="pk-head"><h2 id="pkTitle">Content</h2><input id="pkFind" type="search" placeholder="Search this event's content" aria-label="Search content"></div>
@@ -3846,6 +3869,71 @@ $('rvQuick').addEventListener('click', e => { const b = e.target.closest('button
 $('rvAmt').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); rmRecord(); } });
 $('rvGo').onclick = rmRecord;
 window.addEventListener('pagehide', () => { if (REMOTE && live.joined) rmSend({ t: 'bye' }); });
+
+/* ----- ready for offline: can this laptop run the event with no internet? ----- */
+async function readyCheck() {
+  const out = [], add = (st, title, detail) => out.push({ st: st, title: title, detail: detail }), mb = n => Math.round(n / 1048576).toLocaleString() + ' MB';
+  // the app itself
+  if (location.protocol === 'file:') add('ok', 'The app', 'Running from a file on this laptop, so it opens without internet.');
+  else {
+    let reg = null, page = false;
+    try { reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration('/') : null; } catch (e) {}
+    try { page = !!(await caches.match(location.pathname.replace(/[^/]*$/, '') + 'index.html', { ignoreSearch: true })); } catch (e) {}
+    if (reg && reg.active && page) add('ok', 'The app', 'Saved in this browser, so it opens without internet. Use the same browser on the night.');
+    else add('bad', 'The app', 'Not saved for offline yet. While online, open Neon Loop at its web address, reload the page once, then check again. Installing it (Install in Chrome or Edge) keeps it handy.');
+  }
+  // storage
+  let kept = false, est = null;
+  try { kept = !!(navigator.storage && ((await navigator.storage.persisted()) || (await navigator.storage.persist()))); } catch (e) {}
+  try { est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null; } catch (e) {}
+  if (!db) add('bad', 'Storage', 'This browser is not keeping content between visits (a private window, or storage is blocked). Use a normal window.');
+  else add(kept ? 'ok' : 'warn', 'Storage', (kept ? 'The browser will keep Neon Loop\'s files.' : 'The browser may clear Neon Loop\'s files if this laptop runs low on space. Installing the app usually stops this.') +
+    (est && est.quota ? ' ' + mb(est.usage || 0) + ' used, ' + mb(est.quota - (est.usage || 0)) + ' available.' : ''));
+  if (est && est.quota && est.quota - (est.usage || 0) < 500 * 1048576) add('warn', 'Space', 'Less than 500 MB left for Neon Loop on this laptop. Free some disk space before adding more video.');
+  // the rundown
+  add(state.items.length ? 'ok' : 'warn', 'Rundown', state.items.length ? state.items.length + ' segment' + (state.items.length === 1 ? '' : 's') + ' saved on this laptop.' : 'The rundown is empty.');
+  if (state.cloud && unsaved()) add('warn', 'Rundown', 'Some changes have not reached the cloud yet. That does not affect the show; they upload when you are online.');
+  // content
+  const uses = new Map(), note = (id, what) => { if (id) uses.set(id, (uses.get(id) || []).concat(what)); };
+  state.items.forEach((it, i) => { note(it.asset, 'row ' + (i + 1)); note(it.music, 'row ' + (i + 1) + ' music'); });
+  note(state.holdingAsset, 'holding'); note(state.holdingMusic, 'holding music');
+  const where = id => (uses.get(id) || []).join(', ');
+  uses.forEach((w, id) => { if (!byId(id)) add('bad', 'Missing content', 'Used by ' + w.join(', ') + ', but it has been deleted. Choose other content for ' + (w.length > 1 ? 'those rows' : 'that row') + '.'); });
+  let files = 0, bytes = 0;
+  assets.forEach(a => {
+    if (isTally(a) || a.kind === 'app') return;                         // live graphics are drawn by Neon Loop itself
+    if (a.kind === 'web') { if (uses.has(a.id)) add('warn', a.name, (IMG_URL.test(a.url) ? 'Linked picture' : 'Web page') + ' (' + where(a.id) + '). Needs internet on the night: plan a fallback, or run it as its own switcher input.'); return; }
+    if (a.blob && a.blob.size > 0 && !a.stale) { files++; bytes += a.blob.size; return; }
+    add('bad', a.name, (a.dlFailed ? a.error || 'Download failed.' : a.path ? 'Not downloaded to this laptop yet.' : 'The file is missing on this laptop.') + (uses.has(a.id) ? ' Used by ' + where(a.id) + '.' : ''));
+  });
+  add(files ? 'ok' : 'warn', 'Content', files ? files + ' file' + (files === 1 ? '' : 's') + ' on this laptop (' + mb(bytes) + ').' : 'No content files in this event yet.');
+  return out;
+}
+let readyBusy = false;
+async function readyShow() {
+  if (!state || readyBusy) return; readyBusy = true;
+  if (!$('readyDlg').open) $('readyDlg').showModal();
+  $('rdSum').className = 'rd-sum'; $('rdSum').innerHTML = '<i></i>Checking this laptop…'; $('rdList').innerHTML = ''; $('rdFix').style.display = 'none';
+  let list = [];
+  try { list = await readyCheck(); } catch (e) { list = [{ st: 'bad', title: 'Check failed', detail: String(e && e.message || e) }]; }
+  readyBusy = false;
+  const bad = list.filter(x => x.st === 'bad').length, warn = list.filter(x => x.st === 'warn').length, order = { bad: 0, warn: 1, ok: 2 };
+  $('rdSum').className = 'rd-sum ' + (bad ? 'bad' : warn ? 'warn' : 'ok');
+  $('rdSum').innerHTML = '<i></i>' + esc(bad ? 'Not ready: ' + bad + ' thing' + (bad === 1 ? '' : 's') + ' to fix' : warn ? 'Ready, with ' + warn + ' thing' + (warn === 1 ? '' : 's') + ' to know' : 'Ready: this event runs without internet');
+  $('rdList').innerHTML = list.slice().sort((a, b) => order[a.st] - order[b.st]).map(x => '<li class="' + x.st + '"><b>' + esc(x.title) + '</b><span>' + esc(x.detail) + '</span></li>').join('');
+  const missing = assets.some(a => a.kind !== 'web' && a.kind !== 'app' && a.path && (!a.blob || a.stale));
+  $('rdFix').style.display = missing && signedIn() && navigator.onLine ? '' : 'none';
+}
+$('btnReady').onclick = $('btnReady2').onclick = readyShow;
+$('rdAgain').onclick = readyShow;
+$('rdClose').onclick = () => $('readyDlg').close();
+$('rdFix').onclick = async () => {
+  $('rdFix').disabled = true; $('rdFix').textContent = 'Downloading…';
+  allAssets.forEach(a => { a.dlFailed = false; });
+  try { await sync(true); } catch (e) {}
+  const t0 = Date.now(); while ((syncing || cloud.busy) && Date.now() - t0 < 120000) await new Promise(r => setTimeout(r, 300));
+  $('rdFix').disabled = false; $('rdFix').textContent = 'Download missing content'; readyShow();
+};
 
 /* ---------- keyboard ---------- */
 document.addEventListener('keydown', e => {

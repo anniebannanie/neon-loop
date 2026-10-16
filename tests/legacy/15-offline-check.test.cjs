@@ -1,0 +1,42 @@
+// "Ready for offline": the check lists the app, storage, rundown and content, and catches what would fail without internet.
+const { chromium } = require('playwright');
+const M = n => __dirname + '/media/' + n, URL0 = 'file://' + require('path').resolve(__dirname, '../../public/legacy/index.html');
+(async () => {
+  const b = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {});
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }), errs = [], res = [], ck = (n, c) => res.push((c ? 'PASS ' : 'FAIL ') + n);
+  const p = await ctx.newPage(); p.on('pageerror', e => errs.push(String(e))); p.on('dialog', d => d.accept());
+  await p.goto(URL0); await p.click('#btnNew'); await p.fill('#evNameIn', 'Offline Night'); await p.click('#evSave');
+  await p.setInputFiles('#media', [M('Holding Slate.png'), M('Org 1 Title.png'), M('Walk In.wav')]); await p.waitForFunction(() => document.querySelectorAll('.asset').length === 3);
+  await p.click('#navRun'); await p.click('#btnEdit');
+  const pick = async (i, name) => { await p.locator('#rows tr').nth(i).locator('[data-act=pick]').click(); await p.locator('#pkGrid .pk[data-name="' + name + '"]').click(); };
+  await pick(0, 'Holding Slate'); await pick(1, 'Org 1 Title');
+  await p.locator('#rows tr').nth(9).locator('[data-act=pick]').click(); await p.fill('#pkName', 'Event Butler dashboard'); await p.fill('#pkUrl', 'https://example.com/dashboard'); await p.click('#pkAdd');
+  await p.locator('#rows tr').nth(0).locator('[data-act=pickm]').click(); await p.locator('#pkGrid .pk[data-name="Walk In"]').click();
+  await p.click('#btnEdit');
+  const read = async () => { await p.waitForFunction(() => !/Checking/.test(document.getElementById('rdSum').textContent)); return { sum: await p.textContent('#rdSum'), items: await p.$$eval('#rdList li', l => l.map(x => ({ st: x.className, t: x.querySelector('b').textContent, d: x.querySelector('span').textContent }))) }; };
+  ck('offline check sits with the rundown tools', await p.isVisible('#btnReady') && (await p.textContent('#btnReady')) === 'Offline check');
+  await p.click('#btnReady'); let r = await read();
+  const it = t => r.items.find(x => x.t === t);
+  ck('the app: running from a file counts as offline-ready', it('The app').st === 'ok' && it('The app').d.includes('from a file'));
+  ck('the rundown is on this laptop', it('Rundown').st === 'ok' && it('Rundown').d.startsWith('17 segments'));
+  ck('content files are counted', it('Content').st === 'ok' && it('Content').d.startsWith('3 files on this laptop'));
+  ck('a web page in the rundown is flagged as needing internet, with its row', it('Event Butler dashboard').st === 'warn' && it('Event Butler dashboard').d.includes('row 10') && it('Event Butler dashboard').d.includes('Needs internet'));
+  ck('storage is reported', !!it('Storage') && /available/.test(it('Storage').d));
+  ck('nothing to fix: summary says ready', r.sum.startsWith('Ready') && !r.items.some(x => x.st === 'bad'));
+  ck('no download button when nothing is missing', !(await p.isVisible('#rdFix')));
+  ck('problems are listed before things that are fine', r.items.findIndex(x => x.st === 'ok') > r.items.findIndex(x => x.st === 'warn'));
+  await p.screenshot({ path: 'offline-check.png' });
+  await p.click('#rdClose');
+  // content deleted elsewhere (e.g. by a teammate in the cloud) while a row still points at it
+  await p.click('#navLib'); await p.locator('.asset', { has: p.locator('input[value="Org 1 Title"]') }).locator('[data-act=del]').click(); await p.waitForFunction(() => document.querySelectorAll('.asset').length === 3);
+  ck('deleting content here also clears the rows that used it', await p.evaluate(() => JSON.parse(localStorage.getItem('neonloop.v3')).events[0].items[1].asset === ''));
+  await p.evaluate(() => { const b = JSON.parse(localStorage.getItem('neonloop.v3')); b.events[0].items[1].asset = '9f0e0c1e-0000-4000-8000-000000000000'; localStorage.setItem('neonloop.v3', JSON.stringify(b)); });
+  await p.reload(); await p.waitForSelector('#rows tr');
+  await p.click('#navSet'); await p.click('#btnReady2'); r = await read();
+  ck('settings has the check too, and catches content a row still uses but is gone', r.sum.startsWith('Not ready: 1 thing to fix') && r.items[0].st === 'bad' && r.items[0].t === 'Missing content' && r.items[0].d.includes('row 2'));
+  await p.click('#rdAgain'); r = await read(); ck('check again runs it again', r.sum.startsWith('Not ready'));
+  await p.click('#rdClose');
+  await p.setViewportSize({ width: 390, height: 800 }); await p.click('#btnReady2'); await read();
+  ck('fits a phone', await p.evaluate(() => { const d = document.getElementById('readyDlg').getBoundingClientRect(); return d.right <= innerWidth + 1 && document.documentElement.scrollWidth <= innerWidth + 1; }));
+  errs.forEach(x => res.push('ERR ' + x)); ck('no page errors', !errs.length); console.log(res.join('\n')); await b.close();
+})().catch(e => { console.error('CRASH', e); process.exit(1); });

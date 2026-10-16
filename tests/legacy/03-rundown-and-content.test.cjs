@@ -190,7 +190,7 @@ const M = n => __dirname + '/media/' + n, URL0 = 'file://' + require('path').res
   ck('away from the rundown, the header says what is on air', await p.isVisible('#airMini') && (await p.textContent('#airMiniTxt')).startsWith('On air: Pitch 2') && (await p.getAttribute('#navLib', 'aria-pressed')) === 'true');
   await p.screenshot({ path: 'rail-content.png' });
   await p.click('#navSet');
-  ck('settings page: event summary and five sections', (await p.locator('.setcard').count()) === 5 && (await p.textContent('#setEvent')).includes('TFN Flagship One') && (await p.textContent('#setEvent')).includes('This event accepts') && !(await p.isVisible('#monPgm')) && !(await p.isVisible('#lib')) && (await p.textContent('#cloudTxt3')) === 'Cloud: not connected.');
+  ck('settings page: event summary and six sections', (await p.locator('.setcard').count()) === 6 && (await p.textContent('#setEvent')).includes('TFN Flagship One') && (await p.textContent('#setEvent')).includes('This event accepts') && !(await p.isVisible('#monPgm')) && !(await p.isVisible('#lib')) && (await p.textContent('#cloudTxt3')) === 'Cloud: not connected.');
   await p.screenshot({ path: 'rail-settings.png' });
   await p.click('#btnSettings'); ck('settings page opens event details', await p.isVisible('#evDlg') && (await p.textContent('#evDlgTitle')) === 'Event settings'); await p.click('#evCancel');
   await p.click('#btnCloud3'); ck('settings page opens cloud sign-in', await p.isVisible('#cloudDlg')); await p.click('#cdClose');

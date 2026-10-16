@@ -30,6 +30,8 @@ A screen counts as rebuilt when the React version passes the same behaviour.
 - **Vercel** for hosting, with a preview deployment for every branch.
 - **Installable and offline-first**: the service worker caches the app, including `/legacy/`,
   so the show laptop keeps running with no internet. Pledges and changes sync when it returns.
+  **Offline check** (on the rundown, and in Settings) confirms the app, the rundown and every
+  piece of content are on the laptop, and lists anything missing, with a button to download it.
 
 ## Run it locally
 
