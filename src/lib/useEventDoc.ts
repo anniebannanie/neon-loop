@@ -61,7 +61,11 @@ export interface AssetLite { id: string; name: string; kind: 'image' | 'video' |
 export function useAssets(eventId: string) {
   const k = 'neonloop.app.assets.' + eventId, [list, setList] = useState<AssetLite[]>(() => ls.get<AssetLite[]>(k) || []);
   useEffect(() => {
-    supabase?.from('assets').select('id, name, kind, url').eq('event_id', eventId).order('created_at').then(({ data }) => { if (data) { setList(data as AssetLite[]); ls.set(k, data); } });
+    supabase?.from('assets').select('id, name, kind, url, storage_path').eq('event_id', eventId).order('created_at').then(({ data }) => {
+      if (!data) return;
+      const list = (data as (AssetLite & { storage_path?: string | null })[]).filter(a => !/\/photos\//.test(a.storage_path || '')).map(({ storage_path: _p, ...a }) => a);   // event photos are an album, not show content
+      setList(list); ls.set(k, list);
+    });
   }, [eventId, k]);
   return list;
 }

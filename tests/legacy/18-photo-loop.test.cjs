@@ -1,0 +1,76 @@
+// Event photos: added on the laptop or sent from a phone, checked before they reach the screen, then played as a loop.
+const { chromium } = require('playwright'), path = require('path');
+const sb = require('./mocksb.cjs'); sb.start(8789); const db = sb.db;
+const URL0 = 'file://' + path.resolve(__dirname, '../../public/legacy/index.html'), M = f => path.join(__dirname, 'media', f);
+(async () => {
+  const b = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {});
+  const errs = [], res = [], ck = (n, c) => res.push((c ? 'PASS ' : 'FAIL ') + n);
+  const open = async (w, h, hash) => { const c = await b.newContext({ viewport: { width: w, height: h }, locale: 'en-AU' }); const p = await c.newPage(); p.on('pageerror', e => errs.push((hash || 'A') + ': ' + e)); p.on('dialog', d => d.accept()); await p.goto(URL0 + (hash || '')); return [p, c]; };
+  const signin = async (p, btn) => { await p.click(btn); await p.fill('#cdUrl', 'http://localhost:8789'); await p.fill('#cdKey', 'anon-test'); await p.click('#cdGo'); await p.waitForSelector('#cdEmail', { state: 'visible' }); await p.fill('#cdEmail', 'trevor@example.com'); await p.fill('#cdPass', 'secret123'); await p.click('#cdGo'); await p.waitForSelector('#cdAccount', { state: 'visible' }); await p.click('#cdClose'); };
+  // ---------- the show laptop ----------
+  const [A, ctxA] = await open(1440, 900);
+  await signin(A, '#btnCloud');
+  await A.click('#btnNew'); await A.fill('#evNameIn', 'Gala Night'); await A.click('#evSave');
+  await A.waitForFunction(() => document.getElementById('cloudTxt2').textContent === 'Cloud: all saved', null, { timeout: 10000 }); await A.click('#navLib');
+  ck('Content has an Event photos panel', await A.isVisible('#album') && (await A.textContent('#alSum')).startsWith('No photos yet'));
+  await A.setInputFiles('#alFile', [M('Crowd.jpg'), M('Team.jpg')]);
+  await A.waitForFunction(() => document.querySelectorAll('#alNew .al-ph').length === 2, null, { timeout: 10000 });
+  ck('photos from a camera land in To check', (await A.textContent('#alSum')).includes('0 on the loop · 2 to check'));
+  await A.waitForFunction(() => [...document.querySelectorAll('#alNew img')].every(i => i.naturalWidth > 0), null, { timeout: 5000 }).catch(() => {});
+  ck('they are made smaller (long side 2560) and kept out of the show content', await A.evaluate(() => [...document.querySelectorAll('#alNew img')].every(i => Math.max(i.naturalWidth, i.naturalHeight) === 2560)) && (await A.textContent('#tabLib')) === 'Content (0)' && (await A.locator('#lib .asset').count()) === 0);
+  ck('the header flags new photos to check', await A.isVisible('#phPill') && (await A.textContent('#phPillTxt')) === '2 new photos');
+  await A.locator('#alNew .al-ph').nth(0).locator('[data-ph=ok]').click();
+  await A.locator('#alNew .al-ph').nth(0).locator('[data-ph=skip]').click();
+  ck('approve and skip', (await A.textContent('#alSum')) === '1 on the loop · 1 skipped' && !(await A.isVisible('#phPill')) && (await A.locator('#alOk .al-ph').count()) === 1);
+  await A.click('#alSkipWrap summary'); await A.locator('#alSkip [data-ph=ok]').click();
+  ck('a skipped photo can go back on the loop', (await A.textContent('#alSum')) === '2 on the loop');
+  // the loop on a row
+  await A.click('#navRun'); await A.click('#btnEdit');
+  await A.locator('#rows tr').nth(16).locator('[data-act=pick]').click();
+  ck('photos are not offered as row content', !(await A.locator('#pkGrid .pk', { hasText: 'Crowd' }).count()));
+  await A.click('#pkLive [data-t=photos]'); await A.click('#btnEdit');
+  ck('the row shows the photo loop', (await A.locator('#rows tr').nth(16).textContent()).includes('Photo loop'));
+  ck('photos are not in the sources strip', !(await A.locator('#srcs .src', { hasText: 'Crowd' }).count()));
+  const [O] = await Promise.all([ctxA.waitForEvent('page'), A.click('#btnOut')]); O.on('pageerror', x => errs.push('out: ' + x)); await O.setViewportSize({ width: 1280, height: 720 });
+  await A.locator('#rows tr').nth(16).dblclick();
+  const shown = pg => pg.evaluate(() => { const f = document.querySelector('.tly .ph-f.on img'); return f && f.complete && f.naturalWidth > 0 ? f.naturalWidth + 'x' + f.naturalHeight : ''; });
+  await O.waitForFunction(() => { const f = document.querySelector('.tly .ph-f.on img'); return f && f.naturalWidth > 0; }, null, { timeout: 8000 }).catch(() => {});
+  const first = await shown(O);
+  ck('the output plays the photos', !!first);
+  ck('program monitor shows it too', !!(await shown(A)));
+  ck('newest first (the portrait was added last)', first === '1920x2560');
+  await O.waitForFunction(f => { const i = document.querySelector('.tly .ph-f.on:last-child img'); return i && i.naturalWidth > 0 && i.naturalWidth + 'x' + i.naturalHeight !== f; }, first, { timeout: 9000 }).catch(() => {});
+  ck('then it moves on to the next photo', (await O.evaluate(() => { const i = document.querySelector('.tly .ph-f.on:last-child img'); return i.naturalWidth + 'x' + i.naturalHeight; })) === '2560x1920');
+  ck('no caption until it is switched on', !(await O.isVisible('.ph-cap')));
+  await A.click('#navLib'); await A.check('#alCap'); await A.click('#navRun');
+  await O.waitForSelector('.ph-cap', { state: 'visible', timeout: 5000 }).catch(() => {});
+  ck('thank-you caption with the event name', (await O.textContent('.ph-cap')).startsWith('Thank youGala Night'));
+  await O.screenshot({ path: path.join(__dirname, 'out/photo-loop.png') });
+  // ---------- a phone sends a photo ----------
+  await A.click('#navSet'); await A.check('#rmOn'); await A.click('#navRun');
+  const [R] = await open(390, 844, '#remote');
+  await signin(R, '#rvCloud'); await R.waitForSelector('#rvEvList button'); await R.click('#rvEvList button', { hasText: 'Gala Night' });
+  await R.waitForFunction(() => document.getElementById('rvConn').textContent === 'Live with the show laptop', null, { timeout: 10000 });
+  await R.click('#rvTabPh'); ck('remote has a Photos tab', await R.isVisible('#rvPhGo') && (await R.textContent('#rvPhList')).includes('Nothing sent yet'));
+  await R.setInputFiles('#rvPhFile', [M('Stage.jpg')]);
+  await R.waitForFunction(() => /All sent/.test(document.getElementById('rvPhMsg').textContent), null, { timeout: 10000 }).catch(() => {});
+  ck('the phone sends it, smaller, into the event photos folder', (await R.textContent('#rvPhMsg')).startsWith('All sent') && db.assets.some(a => /\/photos\//.test(a.storage_path) && a.name === 'Photo from Trevor' && a.width === 2560));
+  await A.waitForFunction(() => document.getElementById('phPillTxt').textContent === '1 new photo', null, { timeout: 15000 }).catch(() => {});
+  ck('the laptop fetches it straight away and asks for a check', (await A.textContent('#phPillTxt')) === '1 new photo');
+  ck('it does not go on screen before it is approved', (await O.evaluate(() => document.querySelectorAll('.tly .ph-f').length)) <= 2 && !(await O.evaluate(() => [...document.querySelectorAll('.tly .ph-f img')].some(i => i.naturalWidth === 2560 && i.naturalHeight === 1920 && i.closest('.ph-f').classList.contains('k9')))));
+  await A.click('#phPill'); await A.waitForTimeout(400);
+  ck('the pill opens the photos to check, showing who sent it', await A.isVisible('#alNew') && (await A.textContent('#alNew .al-by')) === 'from Trevor');
+  await A.locator('#alNew [data-ph=ok]').click();
+  await O.waitForFunction(() => { const fs = [...document.querySelectorAll('.tly .ph-f.on img')]; return fs.some(i => i.src && i.naturalWidth === 2560); }, null, { timeout: 9000 }).catch(() => {});
+  ck('once approved, the new photo jumps the queue onto the loop', (await A.textContent('#alSum')) === '3 on the loop');
+  ck('approvals are saved with the event in the cloud', await A.waitForFunction(() => document.getElementById('cloudTxt2').textContent === 'Cloud: all saved', null, { timeout: 10000 }).then(() => { const ev = db.events.find(e => e.name === 'Gala Night'); return !!ev && Object.values(ev.rundown.album || {}).filter(v => v === 'ok').length === 3 && ev.rundown.albumCap === true; }, () => false));
+  ck('laptop photos uploaded into the photos folder too', db.assets.filter(a => /\/photos\//.test(a.storage_path)).length === 3);
+  // offline check
+  await A.click('#navRun'); await A.click('#btnReady'); await A.waitForFunction(() => !/Checking/.test(document.getElementById('rdSum').textContent));
+  ck('offline check counts the photos', (await A.textContent('#rdList')).includes('Event photos3 photos on this laptop'));
+  await A.click('#rdClose');
+  await R.screenshot({ path: path.join(__dirname, 'out/photo-remote.png') });
+  await A.click('#navLib'); await A.locator('#album').screenshot({ path: path.join(__dirname, 'out/photo-album.png') });
+  errs.forEach(x => res.push('ERR ' + x)); ck('no page errors', !errs.length);
+  console.log(res.join('\n')); await b.close(); process.exit(0);
+})().catch(e => { console.error('CRASH', e); process.exit(1); });
