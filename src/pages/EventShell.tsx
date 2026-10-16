@@ -10,6 +10,7 @@ import { Rundown } from './Rundown';
 const ABOUT: Record<string, string> = {
   rundown: 'Segments, timing against the schedule, breaks, transitions, music and the output window.',
   content: 'The event gallery, content rules, uploads and the Content Designer.',
+  photos: 'Event photos from phones and cameras: check them, then play them on the photo loop.',
   guests: 'Spreadsheet import, door check-in, walk-ins and wristbands.',
   pledges: 'Pledge entry for both event types, the live tally, takeovers and the thank-you wall.',
   settings: 'Event details, remote control and exports.'
