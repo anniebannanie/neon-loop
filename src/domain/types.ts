@@ -17,6 +17,8 @@ export interface Segment {
   lx?: string;
   notes?: string;
   trans?: string;
+  after?: '' | 'next';     // when a play-once video ends: go to holding, or take the next row
+  durSet?: boolean;        // the planned length was typed, so a video's length does not replace it
 }
 
 export interface ActualTimes { s: number; e?: number; d?: number }   // started, ended (ms), shortened length (s)

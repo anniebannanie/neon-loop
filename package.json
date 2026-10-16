@@ -11,7 +11,8 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:legacy": "node tests/legacy/run-all.cjs"
+    "test:legacy": "node tests/legacy/run-all.cjs",
+    "test:app": "node tests/app/run-all.cjs"
   },
   "engines": {
     "node": ">=20"

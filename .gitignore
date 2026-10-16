@@ -9,3 +9,5 @@ dev-dist
 dist
 node_modules
 tests/legacy/out
+tests/app/out
+tests/legacy/*.png

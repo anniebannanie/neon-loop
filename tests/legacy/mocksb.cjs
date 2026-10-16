@@ -24,13 +24,17 @@ function start(port) {
       const me = byTok((q.headers.authorization || '').replace('Bearer ', '')); if (!me) return send(401, { message: 'JWT expired' });
       if (p === '/auth/v1/logout') return send(204);
       const idEq = (u.searchParams.get('id') || '').replace('eq.', '');
-      if (p === '/rest/v1/profiles') return send(200, idEq === me.id ? [{ first_name: me.first_name, role: me.role }] : []);
+      if (p === '/rest/v1/profiles') { const rows = idEq === me.id ? [{ first_name: me.first_name, role: me.role }] : [];
+        if (/vnd\.pgrst\.object/.test(q.headers.accept || '')) return rows.length ? send(200, rows[0]) : send(406, { message: 'no rows' });
+        return send(200, rows); }
       if (p === '/rest/v1/events') {
-        if (q.method === 'GET') return send(200, db.events.filter(e => member(me, e.id)));
+        if (q.method === 'GET') { const rows = db.events.filter(e => member(me, e.id) && (!idEq || e.id === idEq));
+          if (/vnd\.pgrst\.object/.test(q.headers.accept || '')) return rows.length ? send(200, rows[0]) : send(406, { message: 'JSON object requested, multiple (or no) rows returned' });
+          return send(200, rows); }
         if (me.role !== 'producer') return q.method === 'POST' ? send(403, { message: 'new row violates row-level security policy' }) : send(200, []);
         if (q.method === 'POST') { const row = json(); if (db.events.some(e => e.id === row.id)) return send(409, { message: 'duplicate key' }); db.events.push(row); return send(201, [row]); }
         const hit = db.events.filter(e => e.id === idEq);
-        if (q.method === 'PATCH') { hit.forEach(e => Object.assign(e, json())); return send(200, hit); }
+        if (q.method === 'PATCH') { hit.forEach(e => Object.assign(e, json())); db.log.push('PATCH event ' + idEq); return send(200, hit); }
         if (q.method === 'DELETE') { db.events = db.events.filter(e => e.id !== idEq); db.assets = db.assets.filter(a => a.event_id !== idEq); return send(200, hit); }
       }
       if (p === '/rest/v1/assets') {

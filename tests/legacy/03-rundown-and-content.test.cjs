@@ -43,6 +43,8 @@ const M = n => __dirname + '/media/' + n, URL0 = 'file://' + require('path').res
   ck('5 bad files rejected with reasons', rej.length === 5 && rej.some(x => x.includes('800×600')) && rej.some(x => x.includes('GIF files are not accepted')) && rej.some(x => x.includes('could not be opened')));
   await p.fill('#webName', 'Pledge dashboard'); await p.fill('#webUrl', 'http://localhost:8765/'); await p.click('#btnWeb');
   ck('4 assets in library', (await p.locator('.asset').count()) === 4);
+  ck('a new video plays once until Loop is ticked', !(await p.locator('.asset', { hasText: 'Video' }).locator('input[data-k=loop]').isChecked()));
+  await p.locator('.asset', { hasText: 'Video' }).locator('input[data-k=loop]').check();     // this one is a background loop
   await p.locator('.asset', { hasText: 'Image' }).first().locator('button[data-act=hold]').click();
   await p.click('#tabRun'); ck('standby at start', (await p.textContent('#airLab')) === 'STANDBY');
   const heads = () => p.locator('#rhead th').allTextContents(), startOf = i => p.locator('#rows tr').nth(i).locator('td.stt').textContent();
@@ -190,7 +192,7 @@ const M = n => __dirname + '/media/' + n, URL0 = 'file://' + require('path').res
   ck('away from the rundown, the header says what is on air', await p.isVisible('#airMini') && (await p.textContent('#airMiniTxt')).startsWith('On air: Pitch 2') && (await p.getAttribute('#navLib', 'aria-pressed')) === 'true');
   await p.screenshot({ path: 'rail-content.png' });
   await p.click('#navSet');
-  ck('settings page: event summary and five sections', (await p.locator('.setcard').count()) === 5 && (await p.textContent('#setEvent')).includes('TFN Flagship One') && (await p.textContent('#setEvent')).includes('This event accepts') && !(await p.isVisible('#monPgm')) && !(await p.isVisible('#lib')) && (await p.textContent('#cloudTxt3')) === 'Cloud: not connected.');
+  ck('settings page: event summary and six sections', (await p.locator('.setcard').count()) === 6 && (await p.textContent('#setEvent')).includes('TFN Flagship One') && (await p.textContent('#setEvent')).includes('This event accepts') && !(await p.isVisible('#monPgm')) && !(await p.isVisible('#lib')) && (await p.textContent('#cloudTxt3')) === 'Cloud: not connected.');
   await p.screenshot({ path: 'rail-settings.png' });
   await p.click('#btnSettings'); ck('settings page opens event details', await p.isVisible('#evDlg') && (await p.textContent('#evDlgTitle')) === 'Event settings'); await p.click('#evCancel');
   await p.click('#btnCloud3'); ck('settings page opens cloud sign-in', await p.isVisible('#cloudDlg')); await p.click('#cdClose');
