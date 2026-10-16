@@ -41,7 +41,7 @@ export function Rundown({ eventId }: { eventId: string }) {
   const setItems = (fn: (it: Segment[]) => Segment[], step = true) => apply(d => ({ ...d, rd: { ...d.rd, items: fn(d.rd.items) } }), step);
   const field = (i: number, f: keyof Segment, v: string, target?: EventTarget) => {
     const first = !target || touched.current !== target; if (target) touched.current = target;          // one undo step per visit to a box
-    setItems(it => updateItem(it, i, { [f]: f === 'dur' ? parseDur(v) : v } as Partial<Segment>), first);
+    setItems(it => updateItem(it, i, (f === 'dur' ? { dur: parseDur(v), durSet: true } : { [f]: v }) as Partial<Segment>), first);   // a typed time is kept even when a video is chosen
   };
   const setRd = (patch: Partial<typeof rd>) => apply(d => ({ ...d, rd: { ...d.rd, ...patch } }));
   const undo = () => { const prev = hist.current.pop(); if (prev) { change(() => prev); bump(n => n + 1); } };
